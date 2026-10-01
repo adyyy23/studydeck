@@ -11,6 +11,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        "primary-ink": "#332821",
+        "espresso": "#49372D",
+        "primary-brown": "#654A3A",
+        "chestnut": "#805B43",
+        "caramel": "#B77A45",
+        "reward-gold": "#D79A45",
+        "warm-paper": "#F7F3EA",
+        "canvas": "#F2EEE6",
+        "elevated-paper": "#FFFCF6",
+        "muted-surface": "#EAE3D8",
+        "warm-border": "#D6CCBF",
+        "success-sage": "#3D6B4F",
+        "danger-coral": "#B84A39",
+        "ai-plum": "#6B4E71",
+
         background: "var(--background)",
         foreground: "var(--foreground)",
         surface: {

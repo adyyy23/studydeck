@@ -5,36 +5,36 @@
 @layer base {
   /* === DEFAULT: StudyDeck Light === */
   :root {
-    --background: #F9FAFB;
-    --foreground: #111827;
-    --surface: #FFFFFF;
-    --surface-muted: #F3F4F6;
-    --surface-subtle: #F9FAFB;
-    --border: #E5E7EB;
-    --accent: #1E3A8A;
-    --accent-light: #DBEAFE;
-    --accent-muted: #93C5FD;
-    --accent-text: #1E3A8A;
-    --muted-text: #6B7280;
-    --progress-bar: #1E3A8A;
-    --selection: #DBEAFE;
+    --background: #F2EEE6;
+    --foreground: #29231F;
+    --surface: #F7F3EA;
+    --surface-muted: #EAE3D8;
+    --surface-subtle: #FFFCF6;
+    --border: #D6CCBF;
+    --accent: #654A3A;
+    --accent-light: #EAE3D8;
+    --accent-muted: #D6CCBF;
+    --accent-text: #332821;
+    --muted-text: #756C64;
+    --progress-bar: #D79A45;
+    --selection: #E8DEC8;
   }
 
   /* === StudyDeck Dark === */
   .dark {
-    --background: #0B0F17;
-    --foreground: #F3F4F6;
-    --surface: #111827;
-    --surface-muted: #1F2937;
-    --surface-subtle: #161F30;
-    --border: #1F2937;
-    --accent: #60A5FA;
-    --accent-light: #1E3A5F;
-    --accent-muted: #1E40AF;
-    --accent-text: #93C5FD;
-    --muted-text: #9CA3AF;
-    --progress-bar: #3B82F6;
-    --selection: #1E3A5F;
+    --background: #181411;
+    --foreground: #F2EEE6;
+    --surface: #221B17;
+    --surface-muted: #2E2520;
+    --surface-subtle: #2B231E;
+    --border: #3D322B;
+    --accent: #D79A45;
+    --accent-light: #382A1E;
+    --accent-muted: #49372D;
+    --accent-text: #F0C078;
+    --muted-text: #9E9186;
+    --progress-bar: #D79A45;
+    --selection: #382A1E;
   }
 
   /* === Midnight Light === */
@@ -457,14 +457,14 @@
 /* ============ XP / Progress Bars ============ */
 .xp-bar-track {
   height: 8px;
-  background: var(--surface-muted);
+  background: #EAE3D8;
   border-radius: 4px;
   overflow: hidden;
   position: relative;
 }
 .xp-bar-fill {
   height: 100%;
-  background: #F59E0B;
+  background: #D79A45;
   border-radius: 4px;
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -787,3 +787,60 @@
 }
 
 
+
+
+/* ============ New Academic Journal Buttons ============ */
+.btn-primary {
+  background-color: #49372D;
+  color: #F7F3EA;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.btn-secondary {
+  background-color: #F7F3EA;
+  color: #49372D;
+  border: 1px solid #654A3A;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-reward {
+  background-color: #D79A45;
+  color: #FFFFFF;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+/* ============ Academic Journal Utilities ============ */
+.journal-sheet {
+  background-color: #F7F3EA;
+  border: 1px solid #D6CCBF;
+  border-radius: 0.5rem;
+}
+.dark .journal-sheet {
+  background-color: #221B17;
+  border-color: #3D322B;
+}
+
+.field-rule {
+  height: 1px;
+  background-color: #D6CCBF;
+}
+.dark .field-rule {
+  background-color: #3D322B;
+}
+
+.badge-seal {
+  border-radius: 50%;
+  border: 2px double currentColor;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

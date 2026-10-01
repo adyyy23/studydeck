@@ -1,94 +1,12 @@
-'use client';
+import re
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  Home,
-  BookOpen,
-  Calendar,
-  Users,
-  BarChart3,
-  Search,
-  Bell,
-  Sparkles,
-  Timer,
-  Flame,
-} from "lucide-react";
-import clsx from "clsx";
-import { Logo } from "@/components/ui/logo";
-import { AnimalAvatar } from "@/components/ui/animal-avatar";
-import { useAuthStore } from "@/lib/store/use-auth-store";
-import { useSocialStore } from "@/lib/store/use-social-store";
-import { useSettingsStore } from "@/lib/store/use-settings-store";
-import { useAcademicStore } from "@/lib/store/use-academic-store";
-import { GlobalSearchModal } from "@/components/search/global-search-modal";
-import { ProfileDrawer } from "@/components/profile/profile-drawer";
-import { NotificationsModal } from "@/components/notifications/notifications-modal";
-import { PomodoroModal } from "@/components/pomodoro/pomodoro-modal";
-import { ContextualAIDrawer } from "@/components/ai/contextual-ai-drawer";
-import { XPBar } from '@/components/ui/xp-bar';
-import { LevelBadge, getLevelFromXP } from '@/components/ui/level-badge';
-import { StreakTracker } from '@/components/ui/streak-tracker';
+with open('components/navigation/app-shell.tsx', 'r') as f:
+    content = f.read()
 
-interface AppShellProps {
-  children: React.ReactNode;
-}
+# I will replace the <aside>...</aside> block with the new one.
+# For mobile nav and header, I'll update text-accent / bg-accent with the requested styles.
 
-export function AppShell({ children }: AppShellProps) {
-  const pathname = usePathname();
-  const { user, isAuthenticated } = useAuthStore();
-  const { notifications } = useSocialStore();
-  const { selectedAvatarId, avatarAccessory, studyPoints } = useSettingsStore();
-  const { calculateStreak } = useAcademicStore();
-
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [pomodoroOpen, setPomodoroOpen] = useState(false);
-  const [aiOpen, setAiOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Keyboard shortcut for Cmd+K search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchOpen((prev) => !prev);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  if (!isMounted) {
-    return <div className="min-h-screen bg-background flex items-center justify-center" />;
-  }
-
-  if (!isAuthenticated || !user) {
-    return <>{children}</>;
-  }
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-  const currentStreak = calculateStreak();
-  const levelInfo = getLevelFromXP(studyPoints);
-
-  const navItems = [
-    { label: "Home", href: "/", icon: Home },
-    { label: "Study", href: "/study", icon: BookOpen },
-    { label: "Calendar", href: "/calendar", icon: Calendar },
-    { label: "Rooms", href: "/rooms", icon: Users },
-    { label: "Progress", href: "/progress", icon: BarChart3 },
-  ];
-
-  return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-background text-foreground transition-colors duration-200">
-      {/* Desktop Persistent Left Navigation Rail */}
-      <aside className="hidden md:flex flex-col w-64 border-r border-[#D6CCBF] dark:border-[#3D322B] bg-[#F7F3EA] dark:bg-[#221B17] h-screen sticky top-0 px-4 py-6 justify-between select-none shrink-0">
+new_aside = """<aside className="hidden md:flex flex-col w-64 border-r border-[#D6CCBF] dark:border-[#3D322B] bg-[#F7F3EA] dark:bg-[#221B17] h-screen sticky top-0 px-4 py-6 justify-between select-none shrink-0">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-6">
             {/* Brand Logo */}
@@ -243,12 +161,17 @@ export function AppShell({ children }: AppShellProps) {
             </div>
           </button>
         </div>
-      </aside>
+      </aside>"""
 
-      {/* Main Container */}
-      <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-8">
-        {/* Mobile Header */}
-        <header className="md:hidden sticky top-0 z-30 bg-[#F7F3EA]/95 dark:bg-[#221B17]/95 backdrop-blur-sm border-b border-[#D6CCBF] dark:border-[#3D322B] px-4 py-2.5 flex items-center justify-between">
+aside_pattern = re.compile(r'<aside.*?</aside>', re.DOTALL)
+content = aside_pattern.sub(new_aside, content)
+
+# update mobile header and bottom nav to match palette
+# find <header ...>...</header>
+# find <nav ...>...</nav>
+
+def replace_mobile_header(match):
+    return """<header className="md:hidden sticky top-0 z-30 bg-[#F7F3EA]/95 dark:bg-[#221B17]/95 backdrop-blur-sm border-b border-[#D6CCBF] dark:border-[#3D322B] px-4 py-2.5 flex items-center justify-between">
           <Link href="/" className="focus:outline-none">
             <Logo size="sm" showWordmark={true} />
           </Link>
@@ -291,16 +214,14 @@ export function AppShell({ children }: AppShellProps) {
               />
             </button>
           </div>
-        </header>
+        </header>"""
 
-        {/* Page Content */}
-        <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 md:px-8 py-5 md:py-8">
-          {children}
-        </main>
-      </div>
+header_pattern = re.compile(r'<header className="md:hidden.*?</header>', re.DOTALL)
+content = header_pattern.sub(replace_mobile_header, content)
 
-      {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#F7F3EA]/95 dark:bg-[#221B17]/95 backdrop-blur-md border-t border-[#D6CCBF] dark:border-[#3D322B] px-2 py-1 flex items-center justify-around select-none">
+
+def replace_mobile_nav(match):
+    return """<nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#F7F3EA]/95 dark:bg-[#221B17]/95 backdrop-blur-md border-t border-[#D6CCBF] dark:border-[#3D322B] px-2 py-1 flex items-center justify-around select-none">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
@@ -322,23 +243,13 @@ export function AppShell({ children }: AppShellProps) {
             </Link>
           );
         })}
-      </nav>
+      </nav>"""
 
-      {/* Global Modals & Drawers */}
-      <GlobalSearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
-      <ProfileDrawer isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
-      <NotificationsModal
-        isOpen={notificationsOpen}
-        onClose={() => setNotificationsOpen(false)}
-      />
-      <PomodoroModal isOpen={pomodoroOpen} onClose={() => setPomodoroOpen(false)} />
-      <ContextualAIDrawer
-        isOpen={aiOpen}
-        onClose={() => setAiOpen(false)}
-        contextTitle="StudyDeck Course Knowledge"
-      />
-    </div>
-  );
-}
+nav_pattern = re.compile(r'<nav className="md:hidden.*?</nav>', re.DOTALL)
+content = nav_pattern.sub(replace_mobile_nav, content)
 
-export default AppShell;
+
+with open('components/navigation/app-shell.tsx', 'w') as f:
+    f.write(content)
+
+print("Done")

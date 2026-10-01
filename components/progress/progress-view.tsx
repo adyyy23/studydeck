@@ -2,21 +2,9 @@
 
 import React, { useState } from "react";
 import {
-  BarChart3,
-  Flame,
-  Clock,
-  CheckCircle2,
-  AlertTriangle,
-  RotateCcw,
-  Sparkles,
-  Layers,
-  Calendar,
-  ArrowRight,
-  TrendingUp,
-  Trophy,
-  Award,
-  Zap,
-  Lock
+  Flame, Clock, CheckCircle2, AlertTriangle, RotateCcw,
+  Sparkles, Layers, Calendar, ArrowRight, TrendingUp, Trophy,
+  Award, Zap, Lock
 } from "lucide-react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
@@ -28,10 +16,6 @@ import { calculateSubjectMastery, calculateOverallMastery } from "@/lib/mastery"
 import { Character, ACCESSORY_META } from "@/components/ui/character";
 import { AnimalAvatar } from "@/components/ui/animal-avatar";
 import { AvatarAccessoryId } from "@/lib/types";
-import { XPBar } from '@/components/ui/xp-bar';
-import { LevelBadge, getLevelFromXP } from '@/components/ui/level-badge';
-import { MasteryRing } from '@/components/ui/mastery-ring';
-// import { AchievementBadge } from '@/components/ui/achievement-badge';
 import { StreakTracker } from '@/components/ui/streak-tracker';
 
 export function ProgressView() {
@@ -141,141 +125,146 @@ export function ProgressView() {
   const totalMins = totalMinutes % 60;
 
   return (
-    <div className="space-y-6 animate-fade-in select-none">
-      
-      {/* SECTION 1: STUDENT PROFILE BAR */}
-      <div className="bg-surface border-b border-border -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 pt-4 pb-5 -mt-4 mb-2">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-800">
-            <AnimalAvatar avatarId={selectedAvatarId} accessory={avatarAccessory} className="w-12 h-12" />
+    <div className="space-y-6 animate-fade-in select-none bg-[#F2EEE6] min-h-screen p-4 sm:p-6 lg:p-8 font-serif text-[#332821]">
+      {/* HEADER: Student Identity Banner */}
+      <div className="bg-[#F7F3EA] border border-[#D6CCBF] rounded-xl p-6 shadow-sm">
+        <div className="flex items-center gap-6 mb-6">
+          <div className="w-20 h-20 rounded-full bg-[#FFFCF6] border-2 border-[#D79A45] flex items-center justify-center shrink-0 shadow-sm relative">
+            <AnimalAvatar avatarId={selectedAvatarId} accessory={avatarAccessory} className="w-14 h-14" />
+            <div className="absolute -bottom-2 -right-2 bg-[#D79A45] text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-[#F7F3EA]">
+              Lv {levelInfo.level}
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-black text-foreground truncate">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-[#332821] tracking-tight">
               {user?.firstName || "Student"} {user?.lastName || ""}
             </h1>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 font-bold text-[10px] uppercase">
-                Level {levelInfo.level}
-              </span>
-              <span className="text-sm font-semibold text-muted-text">Scholar Explorer</span>
-            </div>
+            <p className="text-[#756C64] text-sm font-medium mt-1">Level {levelInfo.level} • Scholar Explorer</p>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50">
-              <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
-              <span className="font-bold text-amber-700 dark:text-amber-500 text-sm">{streak}</span>
+          <div className="text-right">
+            <div className="text-sm font-bold text-[#B77A45] mb-1">{levelInfo.currentXP} / {levelInfo.nextLevelXP} XP</div>
+            <div className="w-48 h-2 bg-[#D6CCBF] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[#D79A45] rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(100, (levelInfo.currentXP / levelInfo.nextLevelXP) * 100)}%` }}
+              />
             </div>
           </div>
         </div>
         
-        <div className="flex items-center gap-3 w-full">
-          <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-amber-500 rounded-full transition-all duration-500"
-              style={{ width: `${Math.min(100, (levelInfo.currentXP / levelInfo.nextLevelXP) * 100)}%` }}
-            />
+        {/* Compact Academic Stats Strip */}
+        <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-t border-[#D6CCBF] text-sm font-medium text-[#332821]">
+          <div className="flex items-center gap-2">
+            <span className="text-emerald-700 font-bold">{overallMasteryPct}%</span> Mastery
           </div>
-          <span className="text-xs font-bold text-muted-text whitespace-nowrap">
-            {levelInfo.currentXP} / {levelInfo.nextLevelXP} XP
-          </span>
-        </div>
-      </div>
-
-      {/* SECTION 2: STATS ROW */}
-      <div className="bg-surface border border-border rounded-xl flex overflow-x-auto divide-x divide-border hide-scrollbar">
-        
-        <div className="flex-none w-32 p-4 flex flex-col items-center justify-center text-center">
-          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mb-1">{flashcards.length > 0 ? Math.round((overall.cardsMastered / flashcards.length) * 100) : 0}%</div>
-          <div className="text-[10px] font-bold text-muted-text uppercase tracking-wider">Mastery</div>
-        </div>
-
-        <div className="flex-none w-32 p-4 flex flex-col items-center justify-center text-center">
-          <div className="text-2xl font-black text-amber-500 flex items-center gap-1 mb-1">
-            {streak}d <Flame className="w-5 h-5 fill-amber-500" />
+          <div className="w-px h-4 bg-[#D6CCBF] hidden sm:block"></div>
+          <div className="flex items-center gap-2">
+            <span className="text-[#D79A45] font-bold">{streak}d</span> Streak
           </div>
-          <div className="text-[10px] font-bold text-muted-text uppercase tracking-wider">Streak</div>
+          <div className="w-px h-4 bg-[#D6CCBF] hidden sm:block"></div>
+          <div className="flex items-center gap-2">
+            <span className="font-bold">{totalHours}h {totalMins}m</span> Studied
+          </div>
+          <div className="w-px h-4 bg-[#D6CCBF] hidden sm:block"></div>
+          <div className="flex items-center gap-2">
+            <span className="text-blue-700 font-bold">{overall.quizAccuracy || 0}%</span> Accuracy
+          </div>
+          <div className="w-px h-4 bg-[#D6CCBF] hidden sm:block"></div>
+          <div className="flex items-center gap-2">
+            <span className="text-[#B77A45] font-bold">{studyPoints}</span> XP Earned
+          </div>
         </div>
-
-        <div className="flex-none w-32 p-4 flex flex-col items-center justify-center text-center">
-          <div className="text-xl font-black text-foreground mb-1">{totalHours}h {totalMins}m</div>
-          <div className="text-[10px] font-bold text-muted-text uppercase tracking-wider">Total Time</div>
-        </div>
-
-        <div className="flex-none w-32 p-4 flex flex-col items-center justify-center text-center">
-          <div className="text-2xl font-black text-blue-600 mb-1">{overall.quizAccuracy || 0}%</div>
-          <div className="text-[10px] font-bold text-muted-text uppercase tracking-wider">Accuracy</div>
-        </div>
-
-        <div className="flex-none w-32 p-4 flex flex-col items-center justify-center text-center">
-          <div className="text-2xl font-black text-indigo-600 mb-1">{studyPoints}</div>
-          <div className="text-[10px] font-bold text-muted-text uppercase tracking-wider">Study XP</div>
-        </div>
-
-        <div className="flex-none w-32 p-4 flex flex-col items-center justify-center text-center">
-          <div className="text-2xl font-black text-foreground mb-1">{overall.cardsMastered}</div>
-          <div className="text-[10px] font-bold text-muted-text uppercase tracking-wider">Mastered</div>
-        </div>
-
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* SECTION 3: KNOWLEDGE PATH */}
-        <div className="lg:col-span-1">
-          <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-4">
+        {/* SIGNATURE COMPONENT: THE KNOWLEDGE PATH */}
+        <div className="lg:col-span-1 space-y-4">
+          <h2 className="text-sm font-bold text-[#49372D] uppercase tracking-widest">
             Knowledge Path
           </h2>
-          <div className="bg-surface border border-border rounded-xl p-5 relative">
-            <div className="absolute left-[39px] top-8 bottom-8 w-0.5 bg-slate-200 dark:bg-slate-800 z-0"></div>
-            <div className="space-y-6 relative z-10">
+          <div className="bg-[#F7F3EA] border border-[#D6CCBF] rounded-xl p-6 relative">
+            <div className="absolute left-[35px] top-10 bottom-10 w-0.5 bg-[#D6CCBF] z-0"></div>
+            <div className="space-y-8 relative z-10">
               
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm border-2 border-surface">
-                  <CheckCircle2 className="w-5 h-5" />
+              {/* Beginner */}
+              <div className="flex items-start gap-4">
+                <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 border-2 border-[#F7F3EA] mt-1 shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-white"></div>
                 </div>
                 <div>
-                  <div className="font-bold text-sm text-foreground">Beginner</div>
-                  <div className="text-xs text-muted-text">Completed</div>
+                  <div className="font-bold text-[#332821]">BEGINNER</div>
+                  <div className="text-xs text-[#756C64] font-medium">[Seal: Novice Scholar]</div>
+                  <div className="text-xs text-emerald-700 font-bold mt-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Completed</div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className={clsx("w-10 h-10 rounded-full text-white flex items-center justify-center shrink-0 shadow-sm border-2 border-surface", (overallMasteryPct || 0) > 20 ? "bg-emerald-500" : "bg-blue-600")}>
-                  {(overallMasteryPct || 0) > 20 ? <CheckCircle2 className="w-5 h-5" /> : <div className="w-3 h-3 rounded-full bg-white"></div>}
+              {/* Explorer */}
+              <div className="flex items-start gap-4">
+                <div className={clsx("w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-2 border-[#F7F3EA] mt-1 shadow-sm", overallMasteryPct > 20 ? "bg-emerald-600 text-white" : "bg-[#D79A45] text-white ring-4 ring-[#D79A45]/20")}>
+                  {overallMasteryPct > 20 ? <div className="w-2 h-2 rounded-full bg-white"></div> : <div className="w-2 h-2 rounded-full bg-white"></div>}
                 </div>
                 <div>
-                  <div className="font-bold text-sm text-foreground">Explorer</div>
-                  <div className="text-xs text-muted-text">{(overallMasteryPct || 0) > 20 ? "Completed" : "Current Phase"}</div>
+                  <div className="font-bold text-[#332821]">EXPLORER</div>
+                  <div className="text-xs text-[#756C64] font-medium">[Seal: Academic Seeker]</div>
+                  {overallMasteryPct > 20 ? (
+                    <div className="text-xs text-emerald-700 font-bold mt-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Completed</div>
+                  ) : (
+                    <div className="text-xs text-[#B77A45] font-bold mt-1">● Current Phase ({overallMasteryPct}% Mastery)</div>
+                  )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className={clsx("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-2", (overallMasteryPct || 0) > 40 ? "bg-emerald-500 text-white border-surface" : "bg-surface border-slate-300 dark:border-slate-700")}>
-                  {(overallMasteryPct || 0) > 40 ? <CheckCircle2 className="w-5 h-5" /> : <Lock className="w-4 h-4 text-slate-400" />}
+              {/* Scholar */}
+              <div className="flex items-start gap-4">
+                <div className={clsx("w-6 h-6 rounded-sm rotate-45 flex items-center justify-center shrink-0 border-2 mt-1", overallMasteryPct > 40 ? "bg-emerald-600 border-[#F7F3EA]" : overallMasteryPct > 20 ? "bg-[#D79A45] border-[#F7F3EA] ring-4 ring-[#D79A45]/20" : "bg-[#FFFCF6] border-[#D6CCBF]")}>
+                  <div className={clsx("w-1.5 h-1.5 rounded-sm bg-white", overallMasteryPct <= 20 && "bg-[#D6CCBF]")}></div>
                 </div>
                 <div>
-                  <div className="font-bold text-sm text-foreground">Scholar</div>
-                  <div className="text-xs text-muted-text">Requires 40% Mastery</div>
+                  <div className="font-bold text-[#332821]">SCHOLAR</div>
+                  <div className="text-xs text-[#756C64] font-medium">[Seal: Research Fellow]</div>
+                  {overallMasteryPct > 40 ? (
+                    <div className="text-xs text-emerald-700 font-bold mt-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Completed</div>
+                  ) : overallMasteryPct > 20 ? (
+                     <div className="text-xs text-[#B77A45] font-bold mt-1">● Current Level ({overallMasteryPct}% Mastery)</div>
+                  ) : (
+                    <div className="text-xs text-[#756C64] font-medium mt-1">○ Unlocks at 40%</div>
+                  )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className={clsx("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-2", (overallMasteryPct || 0) > 65 ? "bg-emerald-500 text-white border-surface" : "bg-surface border-slate-300 dark:border-slate-700")}>
-                  {(overallMasteryPct || 0) > 65 ? <CheckCircle2 className="w-5 h-5" /> : <Lock className="w-4 h-4 text-slate-400" />}
+              {/* Specialist */}
+              <div className="flex items-start gap-4">
+                <div className={clsx("w-6 h-6 rounded-sm rotate-45 flex items-center justify-center shrink-0 border-2 mt-1", overallMasteryPct > 65 ? "bg-emerald-600 border-[#F7F3EA]" : overallMasteryPct > 40 ? "bg-[#D79A45] border-[#F7F3EA] ring-4 ring-[#D79A45]/20" : "bg-[#FFFCF6] border-[#D6CCBF]")}>
+                  <div className={clsx("w-1.5 h-1.5 rounded-sm bg-white", overallMasteryPct <= 40 && "bg-[#D6CCBF]")}></div>
                 </div>
                 <div>
-                  <div className="font-bold text-sm text-foreground">Specialist</div>
-                  <div className="text-xs text-muted-text">Requires 65% Mastery</div>
+                  <div className="font-bold text-[#332821]">SPECIALIST</div>
+                  <div className="text-xs text-[#756C64] font-medium">[Seal: Discipline Master]</div>
+                  {overallMasteryPct > 65 ? (
+                    <div className="text-xs text-emerald-700 font-bold mt-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Completed</div>
+                  ) : overallMasteryPct > 40 ? (
+                     <div className="text-xs text-[#B77A45] font-bold mt-1">● Current Level ({overallMasteryPct}% Mastery)</div>
+                  ) : (
+                    <div className="text-xs text-[#756C64] font-medium mt-1">○ Unlocks at 65%</div>
+                  )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className={clsx("w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-2", (overallMasteryPct || 0) > 85 ? "bg-emerald-500 text-white border-surface" : "bg-surface border-slate-300 dark:border-slate-700")}>
-                  {(overallMasteryPct || 0) > 85 ? <CheckCircle2 className="w-5 h-5" /> : <Lock className="w-4 h-4 text-slate-400" />}
+              {/* Master */}
+              <div className="flex items-start gap-4">
+                <div className={clsx("w-6 h-6 rounded-sm rotate-45 flex items-center justify-center shrink-0 border-2 mt-1", overallMasteryPct > 85 ? "bg-emerald-600 border-[#F7F3EA]" : overallMasteryPct > 65 ? "bg-[#D79A45] border-[#F7F3EA] ring-4 ring-[#D79A45]/20" : "bg-[#FFFCF6] border-[#D6CCBF]")}>
+                  <div className={clsx("w-1.5 h-1.5 rounded-sm bg-white", overallMasteryPct <= 65 && "bg-[#D6CCBF]")}></div>
                 </div>
                 <div>
-                  <div className="font-bold text-sm text-foreground">Master</div>
-                  <div className="text-xs text-muted-text">Requires 85% Mastery</div>
+                  <div className="font-bold text-[#332821]">MASTER</div>
+                  <div className="text-xs text-[#756C64] font-medium">[Seal: Grand Luminary]</div>
+                  {overallMasteryPct > 85 ? (
+                    <div className="text-xs text-emerald-700 font-bold mt-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Completed</div>
+                  ) : overallMasteryPct > 65 ? (
+                     <div className="text-xs text-[#B77A45] font-bold mt-1">● Current Level ({overallMasteryPct}% Mastery)</div>
+                  ) : (
+                    <div className="text-xs text-[#756C64] font-medium mt-1">○ Unlocks at 85%</div>
+                  )}
                 </div>
               </div>
 
@@ -285,91 +274,42 @@ export function ProgressView() {
 
         <div className="lg:col-span-2 space-y-6">
           
-          {/* SECTION 4: COURSE MASTERY BREAKDOWN */}
+          {/* ACHIEVEMENTS */}
           <div>
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-4">
-              Course Mastery
+            <h2 className="text-sm font-bold text-[#49372D] uppercase tracking-widest mb-4">
+              Collectible Achievements
             </h2>
-            
-            {subjects.length === 0 ? (
-              <div className="bg-surface border border-border rounded-xl p-8 text-center text-sm text-muted-text">
-                No subjects added yet. Add a course to start tracking.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {subjects.map((sub) => {
-                  const mStats = calculateSubjectMastery(
-                    sub.id,
-                    flashcards,
-                    quizAttempts,
-                    mistakes,
-                    topics.filter((t) => t.subjectId === sub.id)
-                  );
-                  const masteryLevel = mStats.masteryPercentage > 85 ? "Master" : mStats.masteryPercentage > 65 ? "Specialist" : mStats.masteryPercentage > 40 ? "Scholar" : mStats.masteryPercentage > 20 ? "Explorer" : "Beginner";
-                  
-                  return (
-                    <div key={sub.id} className="bg-surface border border-border rounded-xl p-4 flex flex-col">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <div className="font-mono font-bold text-xs text-blue-600 dark:text-blue-400 mb-0.5">{sub.code}</div>
-                          <div className="text-sm font-bold text-foreground line-clamp-1">{sub.name}</div>
-                        </div>
-                        <span className="text-lg font-black text-emerald-600 dark:text-emerald-400 ml-2">{mStats.masteryPercentage}%</span>
-                      </div>
-                      
-                      <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden mb-2 mt-auto">
-                        <div
-                          className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
-                          style={{ width: `${mStats.masteryPercentage}%` }}
-                        />
-                      </div>
-                      
-                      <div className="text-[10px] font-bold text-muted-text uppercase">
-                        Next milestone: {mStats.masteryPercentage > 85 ? "Completed" : mStats.masteryPercentage > 65 ? "Master" : mStats.masteryPercentage > 40 ? "Specialist" : mStats.masteryPercentage > 20 ? "Scholar" : "Explorer"}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* SECTION 5: RECENT ACHIEVEMENTS */}
-          <div>
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-4">
-              Achievements
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {milestones.map((m) => {
                 const meta = ACCESSORY_META[m.reward];
                 return (
                   <div
                     key={m.id}
                     className={clsx(
-                      "rounded-xl p-4 flex flex-col justify-between border transition-all",
+                      "rounded-xl p-4 flex flex-col justify-between border-2 transition-all",
                       m.unlocked
-                        ? "bg-amber-50/50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900/50"
-                        : "bg-surface border-border opacity-70"
+                        ? "bg-[#F7F3EA] border-[#D79A45]"
+                        : "bg-[#FFFCF6] border-[#D6CCBF]"
                     )}
                   >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={clsx("w-10 h-10 rounded-full flex items-center justify-center shrink-0", m.unlocked ? "bg-amber-100 text-amber-600" : "bg-slate-100 dark:bg-slate-800 text-slate-400")}>
-                        {m.unlocked ? <span className="text-lg">{meta?.icon || "✨"}</span> : <Lock className="w-4 h-4" />}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={clsx("w-12 h-12 rounded-lg flex items-center justify-center shrink-0 border-2", m.unlocked ? "bg-[#FFFCF6] border-[#D79A45] text-[#D79A45]" : "bg-[#F2EEE6] border-[#D6CCBF] text-[#D6CCBF]")}>
+                        {m.unlocked ? <span className="text-2xl">{meta?.icon || "✨"}</span> : <Lock className="w-5 h-5" />}
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-foreground line-clamp-1">{m.title}</div>
-                        <div className="text-[10px] font-medium text-muted-text line-clamp-1">{m.desc}</div>
+                        <div className={clsx("text-sm font-bold line-clamp-1", m.unlocked ? "text-[#332821]" : "text-[#756C64]")}>{m.title}</div>
+                        {m.unlocked && <div className="text-[10px] font-bold text-[#B77A45] bg-[#D79A45]/10 px-2 py-0.5 rounded inline-block mt-1">+XP Awarded</div>}
                       </div>
                     </div>
                     
                     <div>
-                      <div className="flex justify-between items-center mb-1 text-[10px] font-bold">
-                        <span className={m.unlocked ? "text-amber-600" : "text-slate-500"}>{m.unlocked ? "Unlocked" : "Locked"}</span>
-                        <span className="text-muted-text">{Math.min(m.target, m.current)} / {m.target}</span>
+                      <div className="flex justify-between items-center mb-1 text-xs font-bold text-[#756C64]">
+                        <span>{m.unlocked ? "Achieved" : "In Progress"}</span>
+                        <span>{Math.min(m.target, m.current)} / {m.target}</span>
                       </div>
-                      <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1 overflow-hidden">
+                      <div className="w-full bg-[#D6CCBF] rounded-full h-1.5 overflow-hidden">
                         <div
-                          className={clsx("h-1 rounded-full", m.unlocked ? "bg-amber-500" : "bg-slate-400")}
+                          className={clsx("h-full rounded-full transition-all duration-500", m.unlocked ? "bg-[#D79A45]" : "bg-[#756C64]")}
                           style={{ width: `${Math.min(100, (m.current / m.target) * 100)}%` }}
                         />
                       </div>
@@ -380,18 +320,18 @@ export function ProgressView() {
             </div>
           </div>
           
+          {/* WEEKLY ACTIVITY TRACKER */}
+          <div>
+            <h2 className="text-sm font-bold text-[#49372D] uppercase tracking-widest mb-4">
+              Activity Tracker
+            </h2>
+            <div className="bg-[#F7F3EA] border border-[#D6CCBF] rounded-xl p-6">
+              <StreakTracker streak={streak} sessions={sessions} />
+            </div>
+          </div>
+
         </div>
       </div>
-
-      {/* SECTION 6: WEEKLY STREAK TRACKER */}
-      <div className="pt-4">
-        <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-4">
-          Activity Tracker
-        </h2>
-        {/* Render StreakTracker here if available, fallback if not */}
-        <StreakTracker streak={streak} sessions={sessions} />
-      </div>
-
     </div>
   );
 }
