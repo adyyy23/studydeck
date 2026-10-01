@@ -74,9 +74,13 @@ export function AuthView() {
     }
     setLoading(true);
     try {
-      await login(loginEmail, loginPassword);
-    } catch {
-      setError("Failed to sign in. Please try again.");
+      const ok = await login(loginEmail, loginPassword);
+      if (!ok) {
+        const storeError = useAuthStore.getState().error;
+        setError(storeError || "Failed to sign in. Please verify your credentials.");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Failed to sign in. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -95,13 +99,19 @@ export function AuthView() {
     }
     if (signupPassword.length < 6) {
       setError("Password must be at least 6 characters.");
+      return;
     }
     setLoading(true);
     try {
-      await signup({ firstName, lastName, email: signupEmail, password: signupPassword });
-      setMode("onboarding");
-    } catch {
-      setError("Registration could not be completed.");
+      const ok = await signup({ firstName, lastName, email: signupEmail, password: signupPassword });
+      if (ok) {
+        setMode("onboarding");
+      } else {
+        const storeError = useAuthStore.getState().error;
+        setError(storeError || "Registration could not be completed.");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Registration could not be completed.");
     } finally {
       setLoading(false);
     }

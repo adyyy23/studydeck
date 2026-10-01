@@ -3,47 +3,22 @@
 import React, { useEffect } from "react";
 import { ThemeProvider } from "next-themes";
 import { useSettingsStore } from "@/lib/store/use-settings-store";
+import { useAuthStore } from "@/lib/store/use-auth-store";
 
-/**
- * ThemeInjector — reads appTheme and lightDarkMode from the settings store
- * and imperatively applies the correct class names to <html>.
- *
- * Rules:
- *  - Removes all `theme-*` classes from documentElement first.
- *  - Adds `theme-{appTheme}` only when appTheme !== 'studydeck' (default).
- *  - Handles lightDarkMode:
- *      'dark'   → adds 'dark' class
- *      'light'  → removes 'dark' class
- *      'system' → mirrors window.matchMedia('(prefers-color-scheme: dark)')
- */
 function ThemeInjector() {
   const { appTheme, lightDarkMode } = useSettingsStore();
 
   useEffect(() => {
     const root = document.documentElement;
-
-    // 1. Strip all existing theme-* classes
-    const toRemove = Array.from(root.classList).filter((c) =>
-      c.startsWith("theme-")
-    );
+    const toRemove = Array.from(root.classList).filter((c) => c.startsWith("theme-"));
     toRemove.forEach((c) => root.classList.remove(c));
-
-    // 2. Apply colour-palette theme class (skip for the built-in default)
-    if (appTheme !== "studydeck") {
-      root.classList.add(`theme-${appTheme}`);
-    }
-
-    // 3. Apply light / dark mode
+    if (appTheme !== "studydeck") root.classList.add(`theme-${appTheme}`);
     if (lightDarkMode === "dark") {
       root.classList.add("dark");
     } else if (lightDarkMode === "light") {
       root.classList.remove("dark");
     } else {
-      // 'system' — respect OS preference
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-      if (prefersDark) {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
         root.classList.add("dark");
       } else {
         root.classList.remove("dark");
@@ -51,22 +26,47 @@ function ThemeInjector() {
     }
   }, [appTheme, lightDarkMode]);
 
-  // Also listen for OS-level changes when in 'system' mode
   useEffect(() => {
     if (lightDarkMode !== "system") return;
-
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = (e: MediaQueryListEvent) => {
-      if (e.matches) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
+      if (e.matches) document.documentElement.classList.add("dark");
+      else document.documentElement.classList.remove("dark");
     };
-
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, [lightDarkMode]);
+
+  return null;
+}
+
+/** Initializes Supabase session on app load and listens for auth state changes */
+function SupabaseAuthListener() {
+  const { initializeFromSupabase, logout } = useAuthStore();
+
+  useEffect(() => {
+    initializeFromSupabase();
+
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || url === "your_supabase_project_url" || !key) return;
+
+    let cleanup: (() => void) | undefined;
+    import("@/lib/supabase/client").then(({ getSupabaseClient }) => {
+      const sb = getSupabaseClient();
+      const { data: { subscription } } = sb.auth.onAuthStateChange((event) => {
+        if (event === "SIGNED_OUT") {
+          logout();
+        } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+          initializeFromSupabase();
+        }
+      });
+      cleanup = () => subscription.unsubscribe();
+    });
+
+    return () => cleanup?.();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return null;
 }
@@ -75,20 +75,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const { theme } = useSettingsStore();
 
   useEffect(() => {
-    // Unregister any legacy service workers and clear caches
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       navigator.serviceWorker.getRegistrations().then((regs) => {
-        for (const reg of regs) {
-          reg.unregister();
-        }
+        for (const reg of regs) reg.unregister();
       });
     }
   }, []);
 
   return (
     <ThemeProvider attribute="class" defaultTheme={theme} enableSystem={true}>
-      {/* ThemeInjector drives app-specific theme/palette on top of next-themes */}
       <ThemeInjector />
+      <SupabaseAuthListener />
       {children}
     </ThemeProvider>
   );
