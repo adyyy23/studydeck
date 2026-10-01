@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { X, Clock, Zap, CheckCircle2, RotateCcw, AlertTriangle } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Clock, Zap, CheckCircle2, RotateCcw, AlertTriangle } from "lucide-react";
 import clsx from "clsx";
 import { Flashcard, QuizQuestion } from "@/lib/types";
-import { Character } from "@/components/ui/character";
+import { GameShell, GameResultReport } from "./game-shell";
 
 export interface GameResult {
   accuracy: number;
@@ -53,10 +53,10 @@ export function QuizRushGame({ cards, questions, onClose, onComplete }: QuizRush
   const [done, setDone] = useState(false);
   const [mistakes, setMistakes] = useState<GameResult["mistakes"]>([]);
 
-  useEffect(() => {
+  const initGame = useCallback(() => {
     let pool: RushItem[] = [];
 
-    if (questions.length >= 4) {
+    if (questions && questions.length >= 4) {
       pool = questions.map((q) => {
         let opts = q.options && q.options.length >= 2 ? [...q.options] : [];
         if (opts.length < 4) {
@@ -89,9 +89,43 @@ export function QuizRushGame({ cards, questions, onClose, onComplete }: QuizRush
     }
 
     setItems(shuffle(pool).slice(0, 10));
+    setCurrentIndex(0);
+    setTimeLeft(QUESTION_TIME);
+    setCombo(0);
+    setBestCombo(0);
+    setScore(0);
+    setCorrectCount(0);
+    setFeedback(null);
+    setSelectedOption(null);
+    setDone(false);
+    setMistakes([]);
   }, [cards, questions]);
 
-  // Per-question timer
+  useEffect(() => {
+    initGame();
+  }, [initGame]);
+
+  const handleTimeout = useCallback(() => {
+    setFeedback("timeout");
+    setCombo(0);
+    if (items[currentIndex]) {
+      const curr = items[currentIndex];
+      setMistakes((prev) => [
+        ...prev,
+        {
+          questionText: curr.question,
+          correctAnswer: curr.correctAnswer,
+          userAnswer: "Timed out",
+        },
+      ]);
+    }
+
+    setTimeout(() => {
+      advanceNext(false);
+    }, 1100);
+  }, [currentIndex, items]);
+
+  // Per-question countdown timer
   useEffect(() => {
     if (done || feedback !== null || items.length === 0) return;
 
@@ -107,25 +141,7 @@ export function QuizRushGame({ cards, questions, onClose, onComplete }: QuizRush
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentIndex, done, feedback, items.length]);
-
-  const handleTimeout = () => {
-    setFeedback("timeout");
-    setCombo(0);
-    const curr = items[currentIndex];
-    setMistakes((prev) => [
-      ...prev,
-      {
-        questionText: curr.question,
-        correctAnswer: curr.correctAnswer,
-        userAnswer: "Timed out",
-      },
-    ]);
-
-    setTimeout(() => {
-      advanceNext(false);
-    }, 1100);
-  };
+  }, [currentIndex, done, feedback, items.length, handleTimeout]);
 
   const handleAnswer = (option: string) => {
     if (feedback !== null || done || items.length === 0) return;
@@ -183,149 +199,103 @@ export function QuizRushGame({ cards, questions, onClose, onComplete }: QuizRush
     }
   };
 
-  const restartGame = () => {
-    setCurrentIndex(0);
-    setTimeLeft(QUESTION_TIME);
-    setCombo(0);
-    setBestCombo(0);
-    setScore(0);
-    setCorrectCount(0);
-    setFeedback(null);
-    setSelectedOption(null);
-    setDone(false);
-    setMistakes([]);
-    setItems((prev) => shuffle(prev));
-  };
-
   if (items.length === 0) {
     return (
-      <div className="p-8 text-center bg-surface rounded-2xl border border-border">
-        <p className="text-sm text-muted-text">Need at least 3 flashcards or questions to play Quiz Rush.</p>
-        <button onClick={onClose} className="mt-4 px-4 py-2 text-xs rounded-lg border border-border">
-          Close
+      <div className="p-8 text-center bg-[#F7F3EA] dark:bg-[#221B17] rounded-xl border border-[#D6CCBF] dark:border-[#3D322B]">
+        <p className="text-sm text-[#756C64] dark:text-[#9E9186]">
+          Need at least 3 flashcards or questions to play Quiz Rush.
+        </p>
+        <button
+          onClick={onClose}
+          className="btn-secondary mt-4 px-4 py-2 text-xs"
+        >
+          Return to Arcade
         </button>
       </div>
     );
   }
 
   const current = items[currentIndex];
+  const finalAccuracy = Math.round((correctCount / items.length) * 100);
 
   return (
-    <div className="max-w-xl mx-auto p-4 sm:p-6 bg-surface rounded-3xl border border-border shadow-lift animate-fade-in relative">
-      {/* Top Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          <Zap className="w-5 h-5 text-accent" />
-          <h2 className="text-base font-bold text-foreground">Quiz Rush</h2>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-text">
-            {currentIndex + 1} / {items.length}
-          </span>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg border border-border hover:bg-surface-muted transition"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
+    <GameShell
+      title="Quiz Rush"
+      badge="Sprint Recall"
+      topic={`Item ${currentIndex + 1} of ${items.length}`}
+      onExit={onClose}
+      progressPercent={((currentIndex) / items.length) * 100}
+      metrics={[
+        {
+          label: "Time",
+          value: `${timeLeft}s`,
+          icon: <Clock className="w-3.5 h-3.5 text-[#B77A45]" />,
+          highlight: timeLeft <= 4,
+        },
+        {
+          label: "Combo",
+          value: `×${combo}`,
+          icon: <Zap className="w-3.5 h-3.5 text-[#D79A45]" />,
+          highlight: combo >= 2,
+        },
+        {
+          label: "Score",
+          value: score.toLocaleString(),
+          highlight: true,
+        },
+      ]}
+    >
       {done ? (
-        /* Results screen */
-        <div className="py-8 text-center space-y-6">
-          <div className="flex justify-center">
-            <Character expression={correctCount >= items.length * 0.7 ? "celebrating" : "encouraging"} size="lg" />
-          </div>
-
-          <div>
-            <h3 className="text-2xl font-black tracking-tight text-foreground">Rush Completed!</h3>
-            <p className="text-xs text-muted-text mt-1">Speed and accuracy evaluation</p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto">
-            <div className="p-3 rounded-2xl bg-surface-muted border border-border">
-              <span className="text-[10px] uppercase font-bold text-muted-text block">Score</span>
-              <span className="text-xl font-black text-accent">{score}</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-surface-muted border border-border">
-              <span className="text-[10px] uppercase font-bold text-muted-text block">Accuracy</span>
-              <span className="text-xl font-black text-foreground">
-                {Math.round((correctCount / items.length) * 100)}%
-              </span>
-            </div>
-            <div className="p-3 rounded-2xl bg-surface-muted border border-border">
-              <span className="text-[10px] uppercase font-bold text-muted-text block">Best Combo</span>
-              <span className="text-xl font-black text-amber-500">×{bestCombo}</span>
-            </div>
-          </div>
-
-          <div className="flex justify-center gap-3 pt-2">
-            <button
-              onClick={restartGame}
-              className="px-4 py-2.5 rounded-xl border border-border hover:bg-surface-muted font-semibold text-xs transition flex items-center gap-1.5"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Play Again
-            </button>
-            <button
-              onClick={onClose}
-              className="px-6 py-2.5 rounded-xl bg-accent text-white font-semibold text-xs hover:opacity-95 transition shadow-sm"
-            >
-              Done
-            </button>
-          </div>
-        </div>
+        <GameResultReport
+          title="Rush Sprint Complete"
+          score={score}
+          accuracy={finalAccuracy}
+          streak={bestCombo}
+          xp={Math.round(score * 0.12) + 20}
+          isPersonalBest={bestCombo >= 5}
+          onPlayAgain={initGame}
+          onComplete={() => onComplete({
+            accuracy: finalAccuracy,
+            score,
+            streak: bestCombo,
+            durationSeconds: Math.round((Date.now() - startTime) / 1000),
+            mistakes,
+          })}
+          onClose={onClose}
+        />
       ) : (
-        /* Active game */
-        <div className="pt-5 space-y-5">
-          {/* Progress Bar + 15s Timer */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-accent" />
-              <span className={clsx("text-sm font-black", timeLeft <= 4 ? "text-rose-500 animate-pulse" : "text-foreground")}>
-                {timeLeft}s
-              </span>
-            </div>
-
-            {combo >= 2 && (
-              <div className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-300 text-amber-600 dark:text-amber-400 font-black text-xs animate-bounce-in">
-                COMBO ×{combo}!
-              </div>
-            )}
-
-            <span className="text-xs font-bold text-foreground">Score: {score}</span>
-          </div>
-
-          {/* Question Card */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-surface-muted border border-border min-h-[90px] flex items-center justify-center text-center">
-            <h3 className="text-sm sm:text-base font-bold text-foreground leading-snug">
-              {current.question}
+        <div className="max-w-xl mx-auto space-y-4 sm:space-y-6 pt-2">
+          {/* Question Prompt Sheet */}
+          <div className="p-5 sm:p-7 rounded-xl bg-[#FFFCF6] dark:bg-[#2B231E] border border-[#D6CCBF] dark:border-[#3D322B] text-center shadow-xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#756C64] dark:text-[#9E9186] block mb-2">
+              Prompt • 15-Second Window
+            </span>
+            <h3 className="text-base sm:text-lg font-serif font-black text-[#332821] dark:text-[#F2EEE6] leading-snug">
+              {current?.question}
             </h3>
           </div>
 
-          {/* Feedback badge for timeout */}
+          {/* Feedback banner for timeout */}
           {feedback === "timeout" && (
-            <div className="p-2 text-center rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 font-bold text-xs flex items-center justify-center gap-1">
-              <AlertTriangle className="w-3.5 h-3.5" />
-              Time ran out!
+            <div className="p-3 text-center rounded-lg bg-[#FEE2E2] dark:bg-[#450A0A] border border-[#B84A39]/30 text-[#B84A39] font-bold text-xs flex items-center justify-center gap-1.5 animate-bounce-in">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span>Time ran out for this question!</span>
             </div>
           )}
 
           {/* Options Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {current.options.map((opt, idx) => {
+            {current?.options.map((opt, idx) => {
               const isSelected = selectedOption === opt;
               const isCorrectOpt = opt === current.correctAnswer;
 
-              let btnClass = "bg-surface border-border hover:border-accent/40 text-foreground";
+              let btnClass = "bg-[#FFFCF6] dark:bg-[#2B231E] border-[#D6CCBF] dark:border-[#3D322B] text-[#332821] dark:text-[#F2EEE6] hover:border-[#654A3A]";
               if (feedback && isSelected) {
                 btnClass = feedback === "correct"
-                  ? "bg-emerald-50 dark:bg-emerald-950/50 border-emerald-500 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500"
-                  : "bg-rose-50 dark:bg-rose-950/50 border-rose-500 text-rose-700 dark:text-rose-300 ring-2 ring-rose-500 shake";
+                  ? "bg-[#F0FDF4] dark:bg-[#052E16] border-[#3D6B4F] text-[#3D6B4F] dark:text-[#86EFAC] ring-2 ring-[#3D6B4F]"
+                  : "bg-[#FEF2F2] dark:bg-[#450A0A] border-[#B84A39] text-[#B84A39] dark:text-[#FCA5A5] ring-2 ring-[#B84A39] shake";
               } else if (feedback && isCorrectOpt) {
-                btnClass = "bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-700 dark:text-emerald-300";
+                btnClass = "bg-[#F0FDF4] dark:bg-[#052E16] border-[#3D6B4F] text-[#3D6B4F] dark:text-[#86EFAC]";
               }
 
               return (
@@ -334,13 +304,13 @@ export function QuizRushGame({ cards, questions, onClose, onComplete }: QuizRush
                   disabled={feedback !== null}
                   onClick={() => handleAnswer(opt)}
                   className={clsx(
-                    "p-3.5 rounded-xl border text-xs sm:text-sm font-medium transition-all text-left flex items-center justify-between",
+                    "p-3.5 sm:p-4 rounded-xl border text-xs sm:text-sm font-medium transition-all text-left flex items-center justify-between touch-target",
                     btnClass
                   )}
                 >
-                  <span>{opt}</span>
+                  <span className="leading-snug">{opt}</span>
                   {feedback && isSelected && feedback === "correct" && (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#3D6B4F] shrink-0 ml-2" />
                   )}
                 </button>
               );
@@ -348,6 +318,6 @@ export function QuizRushGame({ cards, questions, onClose, onComplete }: QuizRush
           </div>
         </div>
       )}
-    </div>
+    </GameShell>
   );
 }

@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { X, Check, AlertCircle, RotateCcw, Flame } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Check, AlertCircle, RotateCcw, Flame } from "lucide-react";
 import clsx from "clsx";
 import { Flashcard, QuizQuestion } from "@/lib/types";
 import { Character } from "@/components/ui/character";
+import { GameShell, GameResultReport } from "./game-shell";
 
 export interface GameResult {
   accuracy: number;
@@ -16,8 +17,8 @@ export interface GameResult {
 
 interface TrueOrTrapGameProps {
   cards: Flashcard[];
-  questions: QuizQuestion[];
-  subjectId: string;
+  questions?: QuizQuestion[];
+  subjectId?: string;
   onClose: () => void;
   onComplete: (result: GameResult) => void;
 }
@@ -38,7 +39,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export function TrueOrTrapGame({ cards, questions, onClose, onComplete }: TrueOrTrapGameProps) {
+export function TrueOrTrapGame({ cards, questions = [], onClose, onComplete }: TrueOrTrapGameProps) {
   const [items, setItems] = useState<StatementItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -49,10 +50,9 @@ export function TrueOrTrapGame({ cards, questions, onClose, onComplete }: TrueOr
   const [done, setDone] = useState(false);
   const [mistakes, setMistakes] = useState<GameResult["mistakes"]>([]);
 
-  useEffect(() => {
+  const initGame = useCallback(() => {
     const generated: StatementItem[] = [];
 
-    // Prioritize existing true_false quiz questions if available
     const tfQuestions = questions.filter((q) => q.type === "true_false");
     for (const q of tfQuestions) {
       const isTrue = q.correctAnswer.toLowerCase() === "true";
@@ -64,14 +64,12 @@ export function TrueOrTrapGame({ cards, questions, onClose, onComplete }: TrueOr
       });
     }
 
-    // Generate remaining from flashcards
     const cardPool = shuffle(cards);
     for (let i = 0; i < cardPool.length; i++) {
       const card = cardPool[i];
       const makeTrap = i % 2 === 1 && cardPool.length > 1;
 
       if (makeTrap) {
-        // Swap definition with another card to create a TRAP
         const otherCard = cardPool[(i + 1) % cardPool.length];
         generated.push({
           statement: `"${card.front}" means: ${otherCard.back}`,
@@ -80,7 +78,6 @@ export function TrueOrTrapGame({ cards, questions, onClose, onComplete }: TrueOr
           originalTerm: card.front,
         });
       } else {
-        // TRUE statement
         generated.push({
           statement: `"${card.front}" refers to: ${card.back}`,
           isTrue: true,
@@ -91,25 +88,36 @@ export function TrueOrTrapGame({ cards, questions, onClose, onComplete }: TrueOr
     }
 
     setItems(shuffle(generated).slice(0, 12));
+    setCurrentIndex(0);
+    setStreak(0);
+    setBestStreak(0);
+    setCorrectCount(0);
+    setFeedback(null);
+    setMistakes([]);
+    setDone(false);
   }, [cards, questions]);
 
+  useEffect(() => {
+    initGame();
+  }, [initGame]);
+
   const handleAnswer = (choice: boolean) => {
-    if (feedback !== null || items.length === 0) return;
+    if (feedback !== null || items.length === 0 || done) return;
 
     const curr = items[currentIndex];
     const isCorrect = choice === curr.isTrue;
 
     if (isCorrect) {
-      setFeedback("correct");
+      setCorrectCount((c) => c + 1);
       const newStreak = streak + 1;
       setStreak(newStreak);
-      setBestStreak((b) => Math.max(b, newStreak));
-      setCorrectCount((c) => c + 1);
+      if (newStreak > bestStreak) setBestStreak(newStreak);
+      setFeedback("correct");
     } else {
-      setFeedback("wrong");
       setStreak(0);
-      setMistakes((prev) => [
-        ...prev,
+      setFeedback("wrong");
+      setMistakes((m) => [
+        ...m,
         {
           questionText: curr.statement,
           correctAnswer: curr.isTrue ? "TRUE" : "TRAP",
@@ -120,187 +128,125 @@ export function TrueOrTrapGame({ cards, questions, onClose, onComplete }: TrueOr
 
     setTimeout(() => {
       setFeedback(null);
-      if (currentIndex + 1 >= items.length) {
-        setDone(true);
-        const durationSeconds = Math.round((Date.now() - startTime) / 1000);
-        const finalAccuracy = Math.round(((isCorrect ? correctCount + 1 : correctCount) / items.length) * 100);
-        onComplete({
-          accuracy: finalAccuracy,
-          score: (isCorrect ? correctCount + 1 : correctCount) * 10,
-          streak: Math.max(bestStreak, isCorrect ? streak + 1 : bestStreak),
-          durationSeconds,
-          mistakes: isCorrect
-            ? mistakes
-            : [
-                ...mistakes,
-                {
-                  questionText: curr.statement,
-                  correctAnswer: curr.isTrue ? "TRUE" : "TRAP",
-                  userAnswer: choice ? "TRUE" : "TRAP",
-                },
-              ],
-        });
+      if (currentIndex + 1 < items.length) {
+        setCurrentIndex((i) => i + 1);
       } else {
-        setCurrentIndex((prev) => prev + 1);
+        setDone(true);
       }
-    }, 1200);
+    }, 1100);
   };
 
-  const restartGame = () => {
-    setCurrentIndex(0);
-    setStreak(0);
-    setBestStreak(0);
-    setCorrectCount(0);
-    setFeedback(null);
-    setDone(false);
-    setMistakes([]);
-    setItems((prev) => shuffle(prev));
+  const current = items[currentIndex] || {
+    statement: "Loading claim...",
+    isTrue: true,
+    correctExplanation: "",
   };
 
-  if (items.length === 0) {
+  const progressPercent = items.length > 0 ? ((currentIndex + 1) / items.length) * 100 : 0;
+  const accuracy = items.length > 0 ? Math.round((correctCount / items.length) * 100) : 100;
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+
+  if (done) {
+    const score = correctCount * 120 + bestStreak * 30;
+    const xp = correctCount * 8 + (accuracy >= 80 ? 25 : 10);
+    const result: GameResult = {
+      accuracy,
+      score,
+      streak: bestStreak,
+      durationSeconds: elapsed,
+      mistakes,
+    };
+
     return (
-      <div className="p-8 text-center bg-surface rounded-2xl border border-border">
-        <p className="text-sm text-muted-text">Need at least 3 flashcards or questions to play True or Trap.</p>
-        <button onClick={onClose} className="mt-4 px-4 py-2 text-xs rounded-lg border border-border">
-          Close
-        </button>
-      </div>
+      <GameShell title="True or Trap" onExit={onClose}>
+        <GameResultReport
+          title="Trap Detection Complete"
+          score={score}
+          accuracy={accuracy}
+          streak={bestStreak}
+          xp={xp}
+          isPersonalBest={bestStreak >= 4}
+          onPlayAgain={initGame}
+          onComplete={() => onComplete(result)}
+          onClose={onClose}
+        />
+      </GameShell>
     );
   }
 
-  const current = items[currentIndex];
-
   return (
-    <div className="max-w-xl mx-auto p-4 sm:p-6 bg-surface rounded-3xl border border-border shadow-lift animate-fade-in relative">
-      {/* Top Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-black tracking-wider uppercase px-2 py-0.5 rounded bg-surface-muted text-foreground">
-            True or Trap
-          </span>
-          <span className="text-xs text-muted-text">
-            {currentIndex + 1} of {items.length}
-          </span>
+    <GameShell
+      title="True or Trap"
+      badge="Fact Checking"
+      onExit={onClose}
+      progressPercent={progressPercent}
+      metrics={[
+        { label: "Round", value: `${currentIndex + 1}/${items.length}` },
+        { label: "Streak", value: `×${streak}`, highlight: streak > 1 },
+        { label: "Accuracy", value: `${accuracy}%` },
+      ]}
+    >
+      <div className="max-w-xl mx-auto w-full flex flex-col gap-4">
+        {/* Companion Reaction Indicator */}
+        <div className="flex items-center justify-center h-12">
+          {feedback === "correct" ? (
+            <div className="flex items-center gap-2 text-[#3D6B4F] animate-fade-in font-bold text-xs">
+              <Character character="pip" expression="happy" size="xs" />
+              <span>Accurate evaluation!</span>
+            </div>
+          ) : feedback === "wrong" ? (
+            <div className="flex items-center gap-2 text-[#B84A39] animate-fade-in font-bold text-xs">
+              <Character character="pip" expression="confused" size="xs" />
+              <span>Sneaky trap!</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-[#756C64] text-xs font-semibold">
+              <Character character="pip" expression="focused" size="xs" />
+              <span>Is this statement fact or fallacy?</span>
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
-            <Flame className="w-3.5 h-3.5" />
-            <span>{streak}</span>
-          </div>
+        {/* Statement Card */}
+        <div
+          className={clsx(
+            "p-6 sm:p-8 rounded-xl border text-center min-h-[140px] flex flex-col items-center justify-center transition-all shadow-xs",
+            feedback === "correct" && "bg-[#EBF3ED] border-[#3D6B4F]",
+            feedback === "wrong" && "bg-[#FBEBEB] border-[#B84A39]",
+            !feedback && "bg-[#FFFCF6] dark:bg-[#2B231E] border-[#D6CCBF] dark:border-[#3D322B]"
+          )}
+        >
+          <p className="text-base sm:text-lg font-serif font-black text-[#29231F] dark:text-[#F2EEE6] leading-snug">
+            {current.statement}
+          </p>
+
+          {feedback && (
+            <p className="text-xs font-semibold mt-3 text-[#756C64] dark:text-[#9E9186] animate-fade-in">
+              {current.correctExplanation}
+            </p>
+          )}
+        </div>
+
+        {/* Decision Controls: TRUE / TRAP */}
+        <div className="grid grid-cols-2 gap-3 pt-2">
           <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg border border-border hover:bg-surface-muted transition"
+            disabled={feedback !== null}
+            onClick={() => handleAnswer(true)}
+            className="py-4 px-4 rounded-lg border-2 border-[#3D6B4F]/40 bg-[#EBF3ED] text-[#3D6B4F] hover:bg-[#3D6B4F] hover:text-white font-black text-sm sm:text-base tracking-wider transition-all flex items-center justify-center gap-2 touch-target shadow-xs"
           >
-            <X className="w-4 h-4" />
+            <Check className="w-5 h-5 stroke-[2.5]" />
+            <span>TRUE</span>
+          </button>
+          <button
+            disabled={feedback !== null}
+            onClick={() => handleAnswer(false)}
+            className="py-4 px-4 rounded-lg border-2 border-[#B84A39]/40 bg-[#FBEBEB] text-[#B84A39] hover:bg-[#B84A39] hover:text-white font-black text-sm sm:text-base tracking-wider transition-all flex items-center justify-center gap-2 touch-target shadow-xs"
+          >
+            <AlertCircle className="w-5 h-5 stroke-[2.5]" />
+            <span>TRAP</span>
           </button>
         </div>
       </div>
-
-      {done ? (
-        /* Completion screen */
-        <div className="py-8 text-center space-y-6">
-          <div className="flex justify-center">
-            <Character expression={correctCount >= items.length * 0.7 ? "celebrating" : "encouraging"} size="lg" />
-          </div>
-
-          <div>
-            <h3 className="text-2xl font-black tracking-tight text-foreground">Round Complete!</h3>
-            <p className="text-xs text-muted-text mt-1">Accuracy evaluated on academic claims</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
-            <div className="p-3.5 rounded-2xl bg-surface-muted border border-border">
-              <span className="text-[10px] uppercase font-bold text-muted-text block">Accuracy</span>
-              <span className="text-2xl font-black text-foreground">
-                {Math.round((correctCount / items.length) * 100)}%
-              </span>
-            </div>
-            <div className="p-3.5 rounded-2xl bg-surface-muted border border-border">
-              <span className="text-[10px] uppercase font-bold text-muted-text block">Best Streak</span>
-              <span className="text-2xl font-black text-amber-500">{bestStreak}</span>
-            </div>
-          </div>
-
-          <div className="flex justify-center gap-3 pt-2">
-            <button
-              onClick={restartGame}
-              className="px-4 py-2.5 rounded-xl border border-border hover:bg-surface-muted font-semibold text-xs transition flex items-center gap-1.5"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Play Again
-            </button>
-            <button
-              onClick={onClose}
-              className="px-6 py-2.5 rounded-xl bg-accent text-white font-semibold text-xs hover:opacity-95 transition shadow-sm"
-            >
-              Done
-            </button>
-          </div>
-        </div>
-      ) : (
-        /* Active round */
-        <div className="pt-6 space-y-6">
-          {/* Mascot reaction indicator */}
-          <div className="flex items-center justify-center h-16">
-            {feedback === "correct" ? (
-              <div className="flex items-center gap-2 text-emerald-600 animate-bounce-in">
-                <Character expression="happy" size="sm" />
-                <span className="text-xs font-bold">Spot on!</span>
-              </div>
-            ) : feedback === "wrong" ? (
-              <div className="flex items-center gap-2 text-rose-600 animate-shake">
-                <Character expression="confused" size="sm" />
-                <span className="text-xs font-bold">Not quite.</span>
-              </div>
-            ) : (
-              <Character expression="focused" size="sm" />
-            )}
-          </div>
-
-          {/* Statement card */}
-          <div
-            className={clsx(
-              "p-6 sm:p-8 rounded-2xl border transition-all text-center min-h-[140px] flex flex-col items-center justify-center",
-              feedback === "correct"
-                ? "bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-500"
-                : feedback === "wrong"
-                ? "bg-rose-50/70 dark:bg-rose-950/40 border-rose-500"
-                : "bg-surface-muted border-border"
-            )}
-          >
-            <p className="text-base sm:text-lg font-bold text-foreground leading-snug">
-              {current.statement}
-            </p>
-
-            {feedback && (
-              <p className="text-xs font-medium mt-3 text-muted-text animate-fade-up">
-                {current.correctExplanation}
-              </p>
-            )}
-          </div>
-
-          {/* TRUE / TRAP Actions */}
-          <div className="grid grid-cols-2 gap-3.5 pt-2">
-            <button
-              disabled={feedback !== null}
-              onClick={() => handleAnswer(true)}
-              className="py-4 px-4 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 font-black text-sm sm:text-base tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-sm"
-            >
-              <Check className="w-5 h-5" />
-              TRUE
-            </button>
-            <button
-              disabled={feedback !== null}
-              onClick={() => handleAnswer(false)}
-              className="py-4 px-4 rounded-2xl border-2 border-rose-500/40 bg-rose-50/60 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-950/60 font-black text-sm sm:text-base tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-sm"
-            >
-              <AlertCircle className="w-5 h-5" />
-              TRAP
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    </GameShell>
   );
 }

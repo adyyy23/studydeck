@@ -213,80 +213,102 @@ export function QuizRunnerModal({
   const isCurrentCorrect = selectedAnswer.trim().toLowerCase() === currentQ.correctAnswer.trim().toLowerCase();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#332821]/50 backdrop-blur-sm">
       <div
-        className="w-full max-w-3xl bg-surface rounded-xl shadow-2xl overflow-hidden flex flex-col h-[650px] max-h-[90vh]"
+        className="w-full max-w-3xl bg-[#F7F3EA] dark:bg-[#221B17] border border-[#D6CCBF] dark:border-[#3D322B] rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* HUD Bar */}
-        <div className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4 text-xs font-bold">
-            <span className="text-slate-500">Q {currentIndex + 1} / {quiz.questions.length}</span>
-            <span className="text-blue-600">Accuracy: {answeredCountSoFar > 0 ? quizAccuracyLive : 100}%</span>
+        <div className="bg-[#FFFCF6] dark:bg-[#2B231E] border-b border-[#D6CCBF] dark:border-[#3D322B] px-3 sm:px-5 py-3 flex items-center justify-between shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 text-xs font-bold">
+            <span className="text-[#756C64] dark:text-[#9E9186] uppercase tracking-wider">
+              Q {currentIndex + 1} / {quiz.questions.length}
+            </span>
+            <span className="text-[#3D6B4F]">
+              Acc: {answeredCountSoFar > 0 ? quizAccuracyLive : 100}%
+            </span>
             {!quiz.isExamMode && (
               <>
-                <span className="text-amber-600 flex items-center gap-1"><Sparkles className="w-3 h-3"/> Streak ×{quizStreak}</span>
-                <span className="text-purple-600">XP: +{quizXP}</span>
+                <span className="text-[#B77A45] flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-[#D79A45]" /> Streak ×{quizStreak}
+                </span>
+                <span className="text-[#D79A45] font-black">XP: +{quizXP}</span>
               </>
             )}
             {quiz.isExamMode && (
-              <span className="text-rose-600 flex items-center gap-1"><Clock className="w-3 h-3"/> {formatTimer(secondsRemaining)}</span>
+              <span className="text-[#B84A39] flex items-center gap-1">
+                <Clock className="w-3 h-3" /> {formatTimer(secondsRemaining)}
+              </span>
             )}
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <button
+            onClick={onClose}
+            className="p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] rounded-lg transition-colors touch-target"
+            aria-label="Close"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
         {isFinished ? (
-          <div className="flex-1 flex flex-col p-8 bg-surface overflow-y-auto">
-            <div className="flex flex-col items-center justify-center text-center pb-8 border-b border-slate-200 dark:border-slate-800">
-              <Trophy className="w-16 h-16 text-amber-400 mb-4" />
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide">Quiz Complete</h2>
+          <div className="flex-1 flex flex-col p-6 sm:p-8 bg-[#F7F3EA] dark:bg-[#221B17] overflow-y-auto">
+            <div className="flex flex-col items-center justify-center text-center pb-6 sm:pb-8">
+              <div className="w-14 h-14 rounded-full border-2 border-double border-[#D79A45] bg-[#FFFBEB] dark:bg-[#382A1E] text-[#B77A45] dark:text-[#D79A45] flex items-center justify-center mb-4">
+                <Trophy className="w-7 h-7" />
+              </div>
+              <h2 className="text-2xl font-serif font-black text-[#332821] dark:text-[#F2EEE6] uppercase tracking-wide">
+                Quiz Complete
+              </h2>
+              <p className="text-xs text-[#756C64] dark:text-[#9E9186] mt-1">
+                Field assessment evaluation concluded.
+              </p>
               
-              <div className="flex gap-6 mt-6">
-                <div className="flex flex-col items-center bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl min-w-[100px]">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Score</span>
-                  <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mt-6 max-w-sm w-full">
+                <div className="flex flex-col items-center bg-[#FFFCF6] dark:bg-[#2B231E] p-3 rounded-lg border border-[#D6CCBF] dark:border-[#3D322B]">
+                  <span className="text-[10px] font-bold text-[#756C64] dark:text-[#9E9186] uppercase">Score</span>
+                  <span className="text-xl sm:text-2xl font-black text-[#332821] dark:text-[#F2EEE6]">
                     {quiz.questions.filter(q => (answers[q.id] || "").trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()).length}/{quiz.questions.length}
                   </span>
                 </div>
-                <div className="flex flex-col items-center bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl min-w-[100px]">
-                  <span className="text-xs font-bold text-blue-600 uppercase">Accuracy</span>
-                  <span className="text-2xl font-bold text-blue-600">{quizAccuracyLive}%</span>
+                <div className="flex flex-col items-center bg-[#FFFCF6] dark:bg-[#2B231E] p-3 rounded-lg border border-[#D6CCBF] dark:border-[#3D322B]">
+                  <span className="text-[10px] font-bold text-[#756C64] dark:text-[#9E9186] uppercase">Accuracy</span>
+                  <span className="text-xl sm:text-2xl font-black text-[#3D6B4F]">{quizAccuracyLive}%</span>
                 </div>
                 {!quiz.isExamMode && (
-                  <div className="flex flex-col items-center bg-purple-50 dark:bg-purple-900/20 p-4 rounded-xl min-w-[100px]">
-                    <span className="text-xs font-bold text-purple-600 uppercase">Total XP</span>
-                    <span className="text-2xl font-bold text-purple-600">+{quizXP}</span>
+                  <div className="col-span-2 sm:col-span-1 flex flex-col items-center bg-[#FFFBEB] dark:bg-[#382A1E] p-3 rounded-lg border border-[#D79A45]/30">
+                    <span className="text-[10px] font-bold text-[#B77A45] dark:text-[#D79A45] uppercase">Total XP</span>
+                    <span className="text-xl sm:text-2xl font-black text-[#D79A45]">+{quizXP}</span>
                   </div>
                 )}
               </div>
 
-              <p className="mt-6 text-sm text-slate-500 font-medium">
-                Mastery Impact: Calculated based on accuracy.<br/>
-                {quiz.questions.length - (quiz.questions.filter(q => (answers[q.id] || "").trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()).length)} mistakes logged for review.
+              <p className="mt-6 text-xs text-[#756C64] dark:text-[#9E9186] font-medium">
+                Mastery calibrated to your academic record.<br/>
+                {quiz.questions.length - (quiz.questions.filter(q => (answers[q.id] || "").trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()).length)} mistakes logged to notebook.
               </p>
 
-              <div className="flex gap-4 mt-8">
-                <button onClick={onClose} className="px-6 py-3 bg-brand-700 hover:bg-brand-800 text-white font-bold rounded-lg transition-colors">
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={onClose}
+                  className="btn-primary py-2.5 px-6 text-xs font-bold uppercase tracking-wider touch-target"
+                >
                   Continue Studying
                 </button>
               </div>
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col bg-surface relative overflow-hidden">
-            <div className="flex-1 p-8 overflow-y-auto">
+          <div className="flex-1 flex flex-col bg-[#F7F3EA] dark:bg-[#221B17] relative overflow-hidden">
+            <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
               <div className="max-w-2xl mx-auto flex flex-col min-h-full">
                 
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                  <span className="text-[11px] font-bold text-[#756C64] dark:text-[#9E9186] uppercase tracking-widest">
                     Question {currentIndex + 1} of {quiz.questions.length}
                   </span>
                   {(currentQ.type === "identification" || currentQ.type === "fill_blank") && (
-                    <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-bold uppercase rounded">
+                    <span className="px-2 py-0.5 bg-[#EAE3D8] dark:bg-[#2E2520] text-[#654A3A] dark:text-[#D79A45] text-[10px] font-bold uppercase rounded border border-[#D6CCBF] dark:border-[#3D322B]">
                       {currentQ.type.replace('_', ' ')}
                     </span>
                   )}
@@ -294,35 +316,39 @@ export function QuizRunnerModal({
                     <button
                       onClick={() => toggleFlag(currentQ.id)}
                       className={clsx(
-                        "flex items-center gap-1.5 px-2 py-1 text-xs font-bold rounded transition-colors",
-                        flagged[currentQ.id] ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                        "flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg border transition-colors touch-target",
+                        flagged[currentQ.id]
+                          ? "bg-[#FFFBEB] dark:bg-[#382A1E] text-[#B77A45] dark:text-[#D79A45] border-[#D79A45]/40"
+                          : "bg-[#FFFCF6] dark:bg-[#2B231E] text-[#756C64] dark:text-[#9E9186] border-[#D6CCBF] dark:border-[#3D322B]"
                       )}
                     >
                       <Flag className="w-3.5 h-3.5" />
-                      {flagged[currentQ.id] ? "Flagged" : "Flag"}
+                      <span>{flagged[currentQ.id] ? "Flagged" : "Flag"}</span>
                     </button>
                   )}
                 </div>
 
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-8 leading-snug">
-                  {currentQ.question}
-                </h3>
+                <div className="p-4 sm:p-6 rounded-xl bg-[#FFFCF6] dark:bg-[#2B231E] border border-[#D6CCBF] dark:border-[#3D322B] mb-6 shadow-xs">
+                  <h3 className="text-base sm:text-xl font-serif font-black text-[#332821] dark:text-[#F2EEE6] leading-snug">
+                    {currentQ.question}
+                  </h3>
+                </div>
 
                 <div className="flex-1">
                   {currentQ.options && currentQ.options.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2.5">
                       {currentQ.options.map((option, idx) => {
                         const isSelected = selectedAnswer === option;
                         const isCorrectOption = option === currentQ.correctAnswer;
                         const showCorrectness = !quiz.isExamMode && hasSubmittedCurrent;
 
-                        let btnClass = "border-slate-200 dark:border-slate-700 hover:bg-brand-50 hover:border-brand-200 text-slate-700 dark:text-slate-300";
+                        let btnClass = "bg-[#FFFCF6] dark:bg-[#2B231E] border-[#D6CCBF] dark:border-[#3D322B] hover:border-[#654A3A] text-[#332821] dark:text-[#F2EEE6]";
                         if (showCorrectness) {
-                          if (isCorrectOption) btnClass = "bg-green-50 border-green-400 text-green-800 font-bold";
-                          else if (isSelected && !isCurrentCorrect) btnClass = "bg-red-50 border-red-400 text-red-800 font-bold";
-                          else btnClass = "border-slate-200 text-slate-400 opacity-50"; // Dim unselected
+                          if (isCorrectOption) btnClass = "bg-[#F0FDF4] dark:bg-[#052E16] border-[#3D6B4F] text-[#3D6B4F] dark:text-[#86EFAC] font-bold";
+                          else if (isSelected && !isCurrentCorrect) btnClass = "bg-[#FEF2F2] dark:bg-[#450A0A] border-[#B84A39] text-[#B84A39] dark:text-[#FCA5A5] font-bold";
+                          else btnClass = "border-[#D6CCBF] dark:border-[#3D322B] text-[#756C64] dark:text-[#9E9186] opacity-60";
                         } else if (isSelected) {
-                          btnClass = "bg-brand-50 border-brand-500 font-bold text-brand-900";
+                          btnClass = "bg-[#FFFBEB] dark:bg-[#382A1E] border-[#D79A45] text-[#332821] dark:text-[#F2EEE6] font-bold ring-2 ring-[#D79A45]/30";
                         }
 
                         return (
@@ -331,13 +357,13 @@ export function QuizRunnerModal({
                             onClick={() => handleSelectOption(option)}
                             disabled={showCorrectness}
                             className={clsx(
-                              "w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between text-sm",
+                              "w-full p-3.5 sm:p-4 rounded-xl border text-left transition-all flex items-center justify-between text-xs sm:text-sm touch-target",
                               btnClass
                             )}
                           >
-                            <span>{option}</span>
-                            {showCorrectness && isCorrectOption && <Check className="w-5 h-5 text-green-600" />}
-                            {showCorrectness && isSelected && !isCurrentCorrect && <XCircle className="w-5 h-5 text-red-600" />}
+                            <span className="leading-snug">{option}</span>
+                            {showCorrectness && isCorrectOption && <Check className="w-4 h-4 text-[#3D6B4F] shrink-0 ml-2" />}
+                            {showCorrectness && isSelected && !isCurrentCorrect && <XCircle className="w-4 h-4 text-[#B84A39] shrink-0 ml-2" />}
                           </button>
                         );
                       })}
@@ -349,27 +375,27 @@ export function QuizRunnerModal({
                       onChange={(e) => handleSelectOption(e.target.value)}
                       disabled={!quiz.isExamMode && hasSubmittedCurrent}
                       placeholder="Type your answer..."
-                      className="w-full p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:border-brand-500"
+                      className="w-full p-3.5 sm:p-4 rounded-xl border border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] text-[#332821] dark:text-[#F2EEE6] font-medium focus:outline-none focus:border-[#B77A45] text-sm"
                     />
                   )}
                 </div>
 
                 {!quiz.isExamMode && hasSubmittedCurrent && (
-                  <div className="mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex flex-col gap-2">
+                  <div className="mt-5 p-4 rounded-xl bg-[#FFFCF6] dark:bg-[#2B231E] border border-[#D6CCBF] dark:border-[#3D322B] flex flex-col gap-2 animate-fade-in shadow-xs">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 font-bold">
+                      <div className="flex items-center gap-2 font-bold text-xs sm:text-sm">
                         {isCurrentCorrect ? (
-                          <><CheckCircle2 className="w-5 h-5 text-green-600" /><span className="text-green-700">Correct!</span></>
+                          <><CheckCircle2 className="w-4 h-4 text-[#3D6B4F]" /><span className="text-[#3D6B4F]">Correct!</span></>
                         ) : (
-                          <><XCircle className="w-5 h-5 text-red-600" /><span className="text-red-700">Incorrect</span></>
+                          <><XCircle className="w-4 h-4 text-[#B84A39]" /><span className="text-[#B84A39]">Incorrect</span></>
                         )}
                       </div>
-                      <span className={clsx("font-bold text-sm", isCurrentCorrect ? "text-amber-500" : "text-slate-500")}>
+                      <span className={clsx("font-bold text-xs", isCurrentCorrect ? "text-[#D79A45]" : "text-[#756C64] dark:text-[#9E9186]")}>
                         {isCurrentCorrect ? `+${5 + (quizStreak-1)*2} XP` : `Correct Answer: ${currentQ.correctAnswer}`}
                       </span>
                     </div>
                     {currentQ.explanation && (
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">{currentQ.explanation}</p>
+                      <p className="text-xs text-[#756C64] dark:text-[#9E9186] mt-1 leading-relaxed">{currentQ.explanation}</p>
                     )}
                   </div>
                 )}
@@ -377,11 +403,11 @@ export function QuizRunnerModal({
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div className="p-3 sm:p-4 bg-[#FFFCF6] dark:bg-[#2B231E] border-t border-[#D6CCBF] dark:border-[#3D322B] flex items-center justify-between shrink-0">
               <button
                 onClick={handlePrevious}
                 disabled={currentIndex === 0}
-                className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-700 disabled:opacity-30 transition-colors flex items-center gap-2"
+                className="px-3 py-2 text-xs sm:text-sm font-bold text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] disabled:opacity-30 transition-colors flex items-center gap-1.5 touch-target"
               >
                 <ArrowLeft className="w-4 h-4" /> Previous
               </button>
@@ -391,14 +417,14 @@ export function QuizRunnerModal({
                   <button
                     onClick={handleSubmitPracticeQuestion}
                     disabled={!selectedAnswer.trim()}
-                    className="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors"
+                    className="btn-primary py-2.5 px-5 text-xs sm:text-sm font-bold uppercase tracking-wider touch-target"
                   >
                     Check Answer
                   </button>
                 ) : (
                   <button
                     onClick={handleNext}
-                    className="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 text-white text-sm font-bold rounded-lg transition-colors flex items-center gap-2"
+                    className="btn-primary py-2.5 px-5 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-1.5 touch-target"
                   >
                     <span>{currentIndex + 1 === quiz.questions.length ? "Finish Quiz" : "Next Question"}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -409,14 +435,14 @@ export function QuizRunnerModal({
                   {currentIndex + 1 === quiz.questions.length ? (
                     <button
                       onClick={finishQuiz}
-                      className="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 text-white text-sm font-bold rounded-lg transition-colors"
+                      className="btn-primary py-2.5 px-5 text-xs sm:text-sm font-bold uppercase tracking-wider touch-target"
                     >
                       Submit Exam
                     </button>
                   ) : (
                     <button
                       onClick={handleNext}
-                      className="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 text-white text-sm font-bold rounded-lg transition-colors flex items-center gap-2"
+                      className="btn-primary py-2.5 px-5 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-1.5 touch-target"
                     >
                       <span>Next</span>
                       <ArrowRight className="w-4 h-4" />

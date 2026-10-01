@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { X, HelpCircle, CheckCircle2, RotateCcw, ArrowRight } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { HelpCircle, CheckCircle2, RotateCcw, ArrowRight } from "lucide-react";
 import clsx from "clsx";
 import { Flashcard, QuizQuestion } from "@/lib/types";
-import { Character } from "@/components/ui/character";
+import { GameShell, GameResultReport } from "./game-shell";
 
 export interface GameResult {
   accuracy: number;
@@ -16,8 +16,8 @@ export interface GameResult {
 
 interface WordRevealGameProps {
   cards: Flashcard[];
-  questions: QuizQuestion[];
-  subjectId: string;
+  questions?: QuizQuestion[];
+  subjectId?: string;
   onClose: () => void;
   onComplete: (result: GameResult) => void;
 }
@@ -41,8 +41,7 @@ export function WordRevealGame({ cards, onClose, onComplete }: WordRevealGamePro
   const [done, setDone] = useState(false);
   const [mistakes, setMistakes] = useState<GameResult["mistakes"]>([]);
 
-  useEffect(() => {
-    // Pick suitable terms (3 to 20 letters)
+  const initGame = useCallback(() => {
     const valid = cards
       .filter((c) => c.front.trim().length >= 3 && c.front.trim().length <= 25)
       .map((c) => ({
@@ -53,11 +52,24 @@ export function WordRevealGame({ cards, onClose, onComplete }: WordRevealGamePro
     if (valid.length > 0) {
       setRounds(valid.slice(0, 6));
     }
+    setCurrentRoundIdx(0);
+    setRevealedIndices(new Set());
+    setGuessInput("");
+    setRoundScore(100);
+    setTotalScore(0);
+    setRoundsCompleted(0);
+    setFeedback(null);
+    setHintsUsed(0);
+    setDone(false);
+    setMistakes([]);
   }, [cards]);
+
+  useEffect(() => {
+    initGame();
+  }, [initGame]);
 
   const current = rounds[currentRoundIdx] || null;
 
-  // Reveal a random hidden letter
   const handleRevealHint = () => {
     if (!current || feedback) return;
 
@@ -90,7 +102,6 @@ export function WordRevealGame({ cards, onClose, onComplete }: WordRevealGamePro
 
     if (isCorrect) {
       setFeedback("correct");
-      // Reveal all letters
       const all = new Set<number>();
       for (let i = 0; i < current.term.length; i++) all.add(i);
       setRevealedIndices(all);
@@ -99,219 +110,180 @@ export function WordRevealGame({ cards, onClose, onComplete }: WordRevealGamePro
       setRoundsCompleted((r) => r + 1);
     } else {
       setFeedback("wrong");
-      setRoundScore((s) => Math.max(10, s - 20));
-      setMistakes((prev) => [
-        ...prev,
+      setMistakes((m) => [
+        ...m,
         {
-          questionText: `Term for: ${current.definition}`,
+          questionText: current.definition,
           correctAnswer: current.term,
           userAnswer: cleanGuess,
         },
       ]);
+      setRoundScore((s) => Math.max(10, s - 20));
+      setTimeout(() => setFeedback(null), 700);
     }
-
-    setTimeout(() => {
-      setFeedback(null);
-      setGuessInput("");
-      if (isCorrect) {
-        if (currentRoundIdx + 1 >= rounds.length) {
-          setDone(true);
-          const durationSeconds = Math.round((Date.now() - startTime) / 1000);
-          const finalAccuracy = Math.round(((roundsCompleted + 1) / rounds.length) * 100);
-          onComplete({
-            accuracy: finalAccuracy,
-            score: totalScore + roundScore,
-            streak: roundsCompleted + 1,
-            durationSeconds,
-            mistakes,
-          });
-        } else {
-          setCurrentRoundIdx((prev) => prev + 1);
-          setRevealedIndices(new Set());
-          setHintsUsed(0);
-          setRoundScore(100);
-        }
-      }
-    }, 1100);
   };
 
-  const restartGame = () => {
-    setCurrentRoundIdx(0);
-    setRevealedIndices(new Set());
-    setGuessInput("");
-    setRoundScore(100);
-    setTotalScore(0);
-    setRoundsCompleted(0);
+  const handleNextRound = () => {
     setFeedback(null);
-    setHintsUsed(0);
-    setDone(false);
-    setMistakes([]);
+    setGuessInput("");
+    setRevealedIndices(new Set());
+    setRoundScore(100);
+
+    if (currentRoundIdx + 1 < rounds.length) {
+      setCurrentRoundIdx((i) => i + 1);
+    } else {
+      setDone(true);
+    }
   };
 
   if (!current) {
     return (
-      <div className="p-8 text-center bg-surface rounded-2xl border border-border">
-        <p className="text-sm text-muted-text">Need flashcards with concise terms to play Word Reveal.</p>
-        <button onClick={onClose} className="mt-4 px-4 py-2 text-xs rounded-lg border border-border">
-          Close
-        </button>
-      </div>
+      <GameShell title="Word Reveal" onExit={onClose}>
+        <div className="p-8 text-center max-w-md mx-auto">
+          <p className="text-sm font-bold text-[#49372D] dark:text-[#F2EEE6]">
+            Need flashcards with concise terms to play Word Reveal.
+          </p>
+          <button onClick={onClose} className="btn-primary mt-4 px-5 py-2.5 text-xs font-bold uppercase tracking-wider">
+            Back to Arcade
+          </button>
+        </div>
+      </GameShell>
+    );
+  }
+
+  const progressPercent = rounds.length > 0 ? ((currentRoundIdx + 1) / rounds.length) * 100 : 0;
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const accuracy = rounds.length > 0 ? Math.round((roundsCompleted / rounds.length) * 100) : 100;
+
+  if (done) {
+    const xp = Math.round(totalScore / 8) + 15;
+    const result: GameResult = {
+      accuracy,
+      score: totalScore,
+      streak: roundsCompleted,
+      durationSeconds: elapsed,
+      mistakes,
+    };
+
+    return (
+      <GameShell title="Word Reveal" onExit={onClose}>
+        <GameResultReport
+          title="Word Reveal Certified"
+          score={totalScore}
+          accuracy={accuracy}
+          streak={roundsCompleted}
+          xp={xp}
+          isPersonalBest={roundsCompleted >= rounds.length}
+          onPlayAgain={initGame}
+          onComplete={() => onComplete(result)}
+          onClose={onClose}
+        />
+      </GameShell>
     );
   }
 
   return (
-    <div className="max-w-xl mx-auto p-4 sm:p-6 bg-surface rounded-3xl border border-border shadow-lift animate-fade-in relative">
-      {/* Top Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-black tracking-wider uppercase px-2 py-0.5 rounded bg-surface-muted text-foreground">
-            Word Reveal
+    <GameShell
+      title="Word Reveal"
+      badge="Spelling & Recall"
+      onExit={onClose}
+      progressPercent={progressPercent}
+      metrics={[
+        { label: "Round", value: `${currentRoundIdx + 1}/${rounds.length}` },
+        { label: "Round Score", value: roundScore, highlight: true },
+        { label: "Total Score", value: totalScore },
+      ]}
+    >
+      <div className="max-w-xl mx-auto w-full flex flex-col gap-4">
+        {/* Definition Clue Box */}
+        <div className="p-4 sm:p-5 rounded-xl bg-[#FFFCF6] dark:bg-[#2B231E] border border-[#D6CCBF] dark:border-[#3D322B] text-center shadow-xs">
+          <span className="text-[10px] uppercase tracking-wider font-black text-[#B77A45] block mb-1">
+            Definition Clue
           </span>
-          <span className="text-xs text-muted-text">
-            Round {currentRoundIdx + 1} of {rounds.length}
-          </span>
+          <p className="text-sm font-semibold text-[#29231F] dark:text-[#F2EEE6] leading-relaxed">
+            {current.definition}
+          </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="text-xs font-bold text-accent">
-            <span>Score: {totalScore + (feedback === "correct" ? roundScore : 0)}</span>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg border border-border hover:bg-surface-muted transition"
-          >
-            <X className="w-4 h-4" />
-          </button>
+        {/* Revealed Letter Boxes */}
+        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 my-2 select-none">
+          {current.term.split("").map((char, idx) => {
+            if (char === " ") {
+              return <div key={idx} className="w-4 h-10 sm:h-12" />;
+            }
+
+            const isRevealed = revealedIndices.has(idx);
+
+            return (
+              <div
+                key={idx}
+                className={clsx(
+                  "w-8 h-10 sm:w-10 sm:h-12 rounded-lg border-2 flex items-center justify-center font-mono font-black text-sm sm:text-base transition-all",
+                  isRevealed
+                    ? "bg-[#FFFBEB] dark:bg-[#382A1E] border-[#D79A45] text-[#332821] dark:text-[#F2EEE6] scale-100"
+                    : "bg-[#EAE3D8] dark:bg-[#2E2520] border-[#D6CCBF] dark:border-[#3D322B] text-transparent"
+                )}
+              >
+                {isRevealed ? char : "?"}
+              </div>
+            );
+          })}
         </div>
-      </div>
 
-      {done ? (
-        /* Results screen */
-        <div className="py-8 text-center space-y-6">
-          <div className="flex justify-center">
-            <Character expression="celebrating" size="lg" />
-          </div>
-
-          <div>
-            <h3 className="text-2xl font-black tracking-tight text-foreground">
-              All Terms Unlocked!
-            </h3>
-            <p className="text-xs text-muted-text mt-1">Vocabulary mastery session completed</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
-            <div className="p-3.5 rounded-2xl bg-surface-muted border border-border">
-              <span className="text-[10px] uppercase font-bold text-muted-text block">Total Score</span>
-              <span className="text-2xl font-black text-accent">{totalScore}</span>
+        {/* Action / Input Area */}
+        {feedback === "correct" ? (
+          <div className="p-4 rounded-xl border border-[#3D6B4F] bg-[#EBF3ED] flex flex-col sm:flex-row items-center justify-between gap-3 animate-fade-in">
+            <div className="flex items-center gap-2 text-[#3D6B4F] font-bold text-xs">
+              <CheckCircle2 className="w-5 h-5" />
+              <span>Correct term decoded! (+{roundScore} pts)</span>
             </div>
-            <div className="p-3.5 rounded-2xl bg-surface-muted border border-border">
-              <span className="text-[10px] uppercase font-bold text-muted-text block">Solved</span>
-              <span className="text-2xl font-black text-foreground">
-                {roundsCompleted}/{rounds.length}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex justify-center gap-3 pt-2">
             <button
-              onClick={restartGame}
-              className="px-4 py-2.5 rounded-xl border border-border hover:bg-surface-muted font-semibold text-xs transition flex items-center gap-1.5"
+              onClick={handleNextRound}
+              className="btn-primary py-2 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Play Again
-            </button>
-            <button
-              onClick={onClose}
-              className="px-6 py-2.5 rounded-xl bg-accent text-white font-semibold text-xs hover:opacity-95 transition shadow-sm"
-            >
-              Done
+              <span>Next Term</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
-      ) : (
-        /* Active round */
-        <div className="pt-6 space-y-6">
-          {/* Definition Clue */}
-          <div className="p-4 rounded-2xl bg-surface-muted border border-border text-center">
-            <span className="text-[10px] uppercase tracking-wider font-bold text-muted-text block mb-1">
-              Definition Clue
-            </span>
-            <p className="text-sm font-medium text-foreground leading-relaxed">
-              {current.definition}
-            </p>
-          </div>
-
-          {/* Letter Boxes */}
-          <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 py-4">
-            {current.term.split("").map((char, idx) => {
-              if (char === " ") {
-                return <div key={idx} className="w-4 sm:w-6" />;
-              }
-
-              const isRevealed = revealedIndices.has(idx);
-
-              return (
-                <div
-                  key={idx}
-                  className={clsx(
-                    "w-9 h-11 sm:w-11 sm:h-13 rounded-xl border-2 flex items-center justify-center font-mono text-base sm:text-lg font-black transition-all",
-                    isRevealed
-                      ? "border-accent bg-accent-light text-accent-text animate-bounce-in"
-                      : "border-border bg-surface text-transparent"
-                  )}
-                >
-                  {isRevealed ? char : "_"}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Guess Form */}
-          <form onSubmit={handleGuess} className="space-y-3">
-            <div className="relative flex items-center">
+        ) : (
+          <div className="space-y-3">
+            <form onSubmit={handleGuess} className="flex gap-2">
               <input
                 type="text"
                 value={guessInput}
-                disabled={feedback !== null}
                 onChange={(e) => setGuessInput(e.target.value)}
                 placeholder="Type your guess here..."
+                autoFocus
                 className={clsx(
-                  "w-full px-4 py-3 rounded-xl border text-sm uppercase tracking-wider font-bold bg-surface focus:outline-none transition-all",
-                  feedback === "correct"
-                    ? "border-emerald-500 ring-2 ring-emerald-500 text-emerald-700 dark:text-emerald-300"
-                    : feedback === "wrong"
-                    ? "border-rose-500 ring-2 ring-rose-500 text-rose-700 dark:text-rose-300 shake"
-                    : "border-border focus:ring-1 focus:ring-accent text-foreground"
+                  "flex-1 px-3.5 py-2.5 rounded-lg border bg-[#FFFCF6] dark:bg-[#2B231E] text-xs sm:text-sm font-semibold text-[#29231F] dark:text-[#F2EEE6] focus:outline-none focus:ring-1 focus:ring-[#B77A45] uppercase tracking-wider",
+                  feedback === "wrong" && "animate-shake border-[#B84A39]"
                 )}
               />
               <button
                 type="submit"
-                disabled={feedback !== null || !guessInput.trim()}
-                className="absolute right-2 px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-bold hover:opacity-95 transition disabled:opacity-50 flex items-center gap-1"
+                className="btn-primary px-5 py-2.5 text-xs font-bold tracking-wider uppercase whitespace-nowrap"
               >
-                <span>Submit</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                Guess
               </button>
-            </div>
+            </form>
 
             <div className="flex items-center justify-between pt-1">
-              <span className="text-xs text-muted-text">
-                Round value: <strong className="text-foreground">{roundScore} pts</strong>
-              </span>
-
               <button
                 type="button"
                 onClick={handleRevealHint}
-                disabled={feedback !== null}
-                className="text-xs font-medium text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
+                className="flex items-center gap-1.5 text-xs font-bold text-[#756C64] hover:text-[#B77A45] transition-colors"
               >
-                <HelpCircle className="w-3.5 h-3.5" />
-                <span>Reveal Letter (−15 pts)</span>
+                <HelpCircle className="w-4 h-4" />
+                <span>Reveal Letter Hint (-15 pts)</span>
               </button>
+
+              <span className="text-[11px] text-[#756C64]">
+                Hints used: {hintsUsed}
+              </span>
             </div>
-          </form>
-        </div>
-      )}
-    </div>
+          </div>
+        )}
+      </div>
+    </GameShell>
   );
 }

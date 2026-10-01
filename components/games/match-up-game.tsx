@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { X, Clock, Shuffle, CheckCircle2 } from "lucide-react";
+import { Clock, Shuffle, CheckCircle2, RotateCcw } from "lucide-react";
 import clsx from "clsx";
 import { Flashcard, QuizQuestion } from "@/lib/types";
+import { GameShell, GameResultReport } from "./game-shell";
 
 export interface GameResult {
   accuracy: number;
@@ -15,8 +16,8 @@ export interface GameResult {
 
 interface MatchUpGameProps {
   cards: Flashcard[];
-  questions: QuizQuestion[];
-  subjectId: string;
+  questions?: QuizQuestion[];
+  subjectId?: string;
   onClose: () => void;
   onComplete: (result: GameResult) => void;
 }
@@ -60,9 +61,8 @@ export function MatchUpGame({ cards, onClose, onComplete }: MatchUpGameProps) {
   const [bestStreak, setBestStreak] = useState(0);
   const [mistakes, setMistakes] = useState<GameResult["mistakes"]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const startRef = useRef(Date.now());
 
-  useEffect(() => {
+  const initGame = useCallback(() => {
     if (pairs.length < MIN_PAIRS) return;
     const t: MatchCard[] = shuffle(
       pairs.map((c) => ({ id: `t_${c.id}`, pairId: c.id, text: c.front, side: "term" as const, matched: false, animating: null }))
@@ -72,19 +72,30 @@ export function MatchUpGame({ cards, onClose, onComplete }: MatchUpGameProps) {
     );
     setTerms(t);
     setDefs(d);
-    startRef.current = Date.now();
+    setSelectedTerm(t[0]?.id || null);
+    setMoves(0);
+    setCorrect(0);
+    setElapsed(0);
+    setStreak(0);
+    setDone(false);
+    if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+  }, [pairs]);
+
+  useEffect(() => {
+    initGame();
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, []);
+  }, [initGame]);
 
   const accuracy = moves === 0 ? 100 : Math.round((correct / moves) * 100);
+  const progressPercent = pairs.length > 0 ? (correct / pairs.length) * 100 : 0;
 
   const handleTermClick = (id: string) => {
     if (terms.find((t) => t.id === id)?.matched) return;
     setSelectedTerm(id);
   };
 
-  const handleDefClick = useCallback((defId: string) => {
+  const handleDefClick = (defId: string) => {
     const def = defs.find((d) => d.id === defId);
     if (!def || def.matched || !selectedTerm) return;
 
@@ -98,177 +109,232 @@ export function MatchUpGame({ cards, onClose, onComplete }: MatchUpGameProps) {
       setCorrect((c) => c + 1);
       const newStreak = streak + 1;
       setStreak(newStreak);
-      setBestStreak((b) => Math.max(b, newStreak));
+      if (newStreak > bestStreak) setBestStreak(newStreak);
 
-      // Animate correct then remove
-      setTerms((prev) => prev.map((t) => t.id === selectedTerm ? { ...t, animating: "correct" } : t));
-      setDefs((prev) => prev.map((d) => d.id === defId ? { ...d, animating: "correct" } : d));
+      setTerms((prev) => prev.map((t) => (t.id === selectedTerm ? { ...t, matched: true, animating: "correct" } : t)));
+      setDefs((prev) => prev.map((d) => (d.id === defId ? { ...d, matched: true, animating: "correct" } : d)));
 
-      setTimeout(() => {
-        setTerms((prev) => prev.map((t) => t.id === selectedTerm ? { ...t, matched: true, animating: null } : t));
-        setDefs((prev) => prev.map((d) => d.id === defId ? { ...d, matched: true, animating: null } : d));
-      }, 350);
+      // Auto-select next unmatched term
+      const nextTerm = terms.find((t) => !t.matched && t.id !== selectedTerm);
+      setSelectedTerm(nextTerm ? nextTerm.id : null);
+
+      if (correct + 1 === pairs.length) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        setTimeout(() => setDone(true), 600);
+      }
     } else {
       setStreak(0);
-      setMistakes((m) => [...m, { questionText: term.text, correctAnswer: def.text, userAnswer: def.text }]);
-      setTerms((prev) => prev.map((t) => t.id === selectedTerm ? { ...t, animating: "wrong" } : t));
-      setDefs((prev) => prev.map((d) => d.id === defId ? { ...d, animating: "wrong" } : d));
+      setMistakes((prev) => [
+        ...prev,
+        { questionText: term.text, correctAnswer: defs.find((d) => d.pairId === term.pairId)?.text || "", userAnswer: def.text },
+      ]);
+
+      setTerms((prev) => prev.map((t) => (t.id === selectedTerm ? { ...t, animating: "wrong" } : t)));
+      setDefs((prev) => prev.map((d) => (d.id === defId ? { ...d, animating: "wrong" } : d)));
+
       setTimeout(() => {
-        setTerms((prev) => prev.map((t) => t.id === selectedTerm ? { ...t, animating: null } : t));
-        setDefs((prev) => prev.map((d) => d.id === defId ? { ...d, animating: null } : d));
-      }, 450);
+        setTerms((prev) => prev.map((t) => ({ ...t, animating: null })));
+        setDefs((prev) => prev.map((d) => ({ ...d, animating: null })));
+      }, 500);
     }
-
-    setSelectedTerm(null);
-  }, [defs, terms, selectedTerm, streak]);
-
-  // Check completion
-  useEffect(() => {
-    if (terms.length > 0 && terms.every((t) => t.matched) && !done) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      setDone(true);
-    }
-  }, [terms, done]);
+  };
 
   if (pairs.length < MIN_PAIRS) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-        <p className="text-lg font-semibold" style={{ color: "var(--foreground)" }}>Need at least 3 flashcards</p>
-        <p className="text-sm mt-2" style={{ color: "var(--muted-text)" }}>Add more flashcards to this subject to play Match Up.</p>
-        <button onClick={onClose} className="mt-6 px-6 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--accent)", color: "#fff" }}>Close</button>
-      </div>
+      <GameShell title="Match Up" onExit={onClose}>
+        <div className="flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto">
+          <p className="text-sm font-bold text-[#49372D] dark:text-[#F2EEE6] mb-4">
+            Need at least 3 flashcards in this subject to play Match Up.
+          </p>
+          <button onClick={onClose} className="btn-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider">
+            Back to Arcade
+          </button>
+        </div>
+      </GameShell>
     );
   }
 
   if (done) {
-    const result: GameResult = { accuracy, score: correct * 10, streak: bestStreak, durationSeconds: elapsed, mistakes };
-    return <MatchUpResult accuracy={accuracy} moves={moves} elapsed={elapsed} bestStreak={bestStreak} onPlayAgain={() => window.location.reload()} onComplete={() => onComplete(result)} onClose={onClose} />;
+    const xpEarned = correct * 5 + (accuracy >= 80 ? 25 : 10);
+    const result: GameResult = {
+      accuracy,
+      score: correct * 100 + bestStreak * 20,
+      streak: bestStreak,
+      durationSeconds: elapsed,
+      mistakes,
+    };
+
+    return (
+      <GameShell title="Match Up" onExit={onClose}>
+        <GameResultReport
+          title="Match Up Certified"
+          score={result.score}
+          accuracy={accuracy}
+          streak={bestStreak}
+          xp={xpEarned}
+          isPersonalBest={bestStreak >= 4}
+          onPlayAgain={initGame}
+          onComplete={() => onComplete(result)}
+          onClose={onClose}
+        />
+      </GameShell>
+    );
   }
 
+  const activeTermObj = terms.find((t) => t.id === selectedTerm);
+
   return (
-    <div className="flex flex-col h-full" style={{ background: "var(--background)" }}>
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-        <button onClick={onClose} className="p-1.5 rounded-lg hover:opacity-70 transition-opacity">
-          <X size={18} style={{ color: "var(--muted-text)" }} />
-        </button>
-        <div className="flex items-center gap-4 text-sm font-medium" style={{ color: "var(--muted-text)" }}>
-          <span className="flex items-center gap-1.5">
-            <Clock size={14} />
-            {formatTime(elapsed)}
-          </span>
-          <span>Moves: <strong style={{ color: "var(--foreground)" }}>{moves}</strong></span>
-          <span>Accuracy: <strong style={{ color: "var(--foreground)" }}>{accuracy}%</strong></span>
+    <GameShell
+      title="Match Up"
+      badge="Matching"
+      onExit={onClose}
+      progressPercent={progressPercent}
+      metrics={[
+        { label: "Time", value: formatTime(elapsed), icon: <Clock className="w-3.5 h-3.5 text-[#B77A45]" /> },
+        { label: "Moves", value: moves },
+        { label: "Streak", value: `×${streak}`, highlight: streak > 1 },
+        { label: "Accuracy", value: `${accuracy}%` },
+      ]}
+    >
+      <div className="max-w-4xl mx-auto w-full">
+        {/* DESKTOP & TABLET: 2-column Match Layout (sm and up) */}
+        <div className="hidden sm:grid sm:grid-cols-2 gap-4">
+          {/* Terms Column */}
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] font-black uppercase tracking-wider text-[#756C64] dark:text-[#9E9186]">
+                Academic Terms ({terms.filter((t) => !t.matched).length} remaining)
+              </span>
+            </div>
+            {terms.map((card) => {
+              const isSelected = selectedTerm === card.id;
+              if (card.matched) {
+                return (
+                  <div
+                    key={card.id}
+                    className="p-3 rounded-lg border border-dashed border-[#D6CCBF] dark:border-[#3D322B] bg-[#EAE3D8]/30 dark:bg-[#2E2520]/30 min-h-[58px] flex items-center justify-center opacity-40"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-[#3D6B4F]" />
+                  </div>
+                );
+              }
+
+              return (
+                <button
+                  key={card.id}
+                  onClick={() => handleTermClick(card.id)}
+                  className={clsx(
+                    "p-3 rounded-lg border text-sm font-semibold text-left transition-all duration-150 min-h-[58px] flex items-center justify-between touch-target",
+                    card.animating === "wrong" && "animate-shake bg-[#FBEBEB] border-[#B84A39] text-[#B84A39]",
+                    card.animating === "correct" && "bg-[#EBF3ED] border-[#3D6B4F] text-[#3D6B4F]",
+                    isSelected
+                      ? "bg-[#FFFCF6] dark:bg-[#2B231E] border-2 border-[#B77A45] shadow-xs text-[#332821] dark:text-[#F2EEE6]"
+                      : "bg-[#F7F3EA] dark:bg-[#221B17] border-[#D6CCBF] dark:border-[#3D322B] hover:border-[#805B43] text-[#49372D] dark:text-[#F2EEE6]"
+                  )}
+                >
+                  <span className="line-clamp-2">{card.text}</span>
+                  {isSelected && <span className="w-2 h-2 rounded-full bg-[#B77A45]" />}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Definitions Column */}
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] font-black uppercase tracking-wider text-[#756C64] dark:text-[#9E9186]">
+                Definitions & Explanations
+              </span>
+            </div>
+            {defs.map((card) => {
+              if (card.matched) {
+                return (
+                  <div
+                    key={card.id}
+                    className="p-3 rounded-lg border border-dashed border-[#D6CCBF] dark:border-[#3D322B] bg-[#EAE3D8]/30 dark:bg-[#2E2520]/30 min-h-[58px] flex items-center justify-center opacity-40"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-[#3D6B4F]" />
+                  </div>
+                );
+              }
+
+              return (
+                <button
+                  key={card.id}
+                  onClick={() => handleDefClick(card.id)}
+                  disabled={!selectedTerm}
+                  className={clsx(
+                    "p-3 rounded-lg border text-xs sm:text-sm font-medium text-left transition-all duration-150 min-h-[58px] flex items-center touch-target",
+                    card.animating === "wrong" && "animate-shake bg-[#FBEBEB] border-[#B84A39] text-[#B84A39]",
+                    card.animating === "correct" && "bg-[#EBF3ED] border-[#3D6B4F] text-[#3D6B4F]",
+                    !selectedTerm
+                      ? "opacity-60 cursor-not-allowed bg-[#F7F3EA] dark:bg-[#221B17] border-[#D6CCBF] dark:border-[#3D322B]"
+                      : "bg-[#FFFCF6] dark:bg-[#2B231E] border-[#D6CCBF] dark:border-[#3D322B] hover:border-[#B77A45] hover:bg-[#F2EEE6] text-[#29231F] dark:text-[#F2EEE6]"
+                  )}
+                >
+                  <span className="line-clamp-3">{card.text}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div className="w-8" />
-      </div>
 
-      {/* Game area */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
-          {/* Terms column */}
-          <div className="flex flex-col gap-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-center" style={{ color: "var(--muted-text)" }}>Terms</p>
-            {terms.map((card) => (
-              <button
-                key={card.id}
-                onClick={() => handleTermClick(card.id)}
-                disabled={card.matched}
-                className={clsx(
-                  "p-3 rounded-xl border-2 text-sm font-medium text-center transition-all duration-200 min-h-[64px] flex items-center justify-center",
-                  card.animating === "wrong" && "shake",
-                  card.matched && "opacity-0 pointer-events-none",
-                  selectedTerm === card.id && "ring-2"
-                )}
-                style={{
-                  borderColor: selectedTerm === card.id ? "var(--accent)" : card.animating === "correct" ? "#16a34a" : "var(--border)",
-                  background: selectedTerm === card.id ? "var(--accent-light)" : card.animating === "correct" ? "#dcfce7" : "var(--surface)",
-                  color: "var(--foreground)",
-                  boxShadow: selectedTerm === card.id ? "0 0 0 3px var(--accent-light)" : "none",
-                  transition: card.matched ? "opacity 0.3s ease" : "all 0.2s ease",
-                }}
-              >
-                {card.text}
-              </button>
-            ))}
+        {/* MOBILE LAYOUT (<640px): Dedicated Term Focus Card + Stacked Definition Options */}
+        <div className="sm:hidden flex flex-col gap-4">
+          {/* Active Term Focus Card */}
+          <div className="p-4 rounded-xl border-2 border-[#B77A45] bg-[#FFFCF6] dark:bg-[#2B231E] shadow-xs">
+            <span className="text-[10px] font-black uppercase tracking-wider text-[#B77A45] block mb-1">
+              Active Concept to Match
+            </span>
+            <h3 className="text-base font-serif font-black text-[#332821] dark:text-[#F2EEE6]">
+              {activeTermObj ? activeTermObj.text : "Select a term below"}
+            </h3>
           </div>
 
-          {/* Definitions column */}
-          <div className="flex flex-col gap-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-center" style={{ color: "var(--muted-text)" }}>Definitions</p>
-            {defs.map((card) => (
-              <button
-                key={card.id}
-                onClick={() => handleDefClick(card.id)}
-                disabled={card.matched || !selectedTerm}
-                className={clsx(
-                  "p-3 rounded-xl border-2 text-sm text-center transition-all duration-200 min-h-[64px] flex items-center justify-center",
-                  card.animating === "wrong" && "shake",
-                  card.matched && "opacity-0 pointer-events-none",
-                  !selectedTerm && "cursor-default"
-                )}
-                style={{
-                  borderColor: card.animating === "correct" ? "#16a34a" : "var(--border)",
-                  background: card.animating === "correct" ? "#dcfce7" : card.matched ? "transparent" : "var(--surface)",
-                  color: "var(--foreground)",
-                  transition: card.matched ? "opacity 0.3s ease" : "all 0.15s ease",
-                }}
-              >
-                {card.text}
-              </button>
-            ))}
+          {/* Quick Term Selector Tabs if user wants to switch which term they're solving */}
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            {terms
+              .filter((t) => !t.matched)
+              .map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setSelectedTerm(t.id)}
+                  className={clsx(
+                    "px-3 py-1.5 rounded-md text-xs font-bold whitespace-nowrap border shrink-0 transition-colors",
+                    selectedTerm === t.id
+                      ? "bg-[#49372D] text-[#F7F3EA] border-[#49372D]"
+                      : "bg-[#F7F3EA] text-[#756C64] border-[#D6CCBF]"
+                  )}
+                >
+                  {t.text}
+                </button>
+              ))}
+          </div>
+
+          {/* Stacked Definition Choices */}
+          <div className="space-y-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-[#756C64] dark:text-[#9E9186] block">
+              Choose the Matching Definition:
+            </span>
+            {defs
+              .filter((d) => !d.matched)
+              .map((card) => (
+                <button
+                  key={card.id}
+                  onClick={() => handleDefClick(card.id)}
+                  className={clsx(
+                    "w-full p-3 rounded-lg border text-left text-xs font-medium transition-all min-h-[50px] flex items-center touch-target",
+                    card.animating === "wrong" && "animate-shake bg-[#FBEBEB] border-[#B84A39] text-[#B84A39]",
+                    card.animating === "correct" && "bg-[#EBF3ED] border-[#3D6B4F] text-[#3D6B4F]",
+                    "bg-[#FFFCF6] dark:bg-[#2B231E] border-[#D6CCBF] dark:border-[#3D322B] active:bg-[#EAE3D8] text-[#29231F] dark:text-[#F2EEE6]"
+                  )}
+                >
+                  {card.text}
+                </button>
+              ))}
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function MatchUpResult({ accuracy, moves, elapsed, bestStreak, onPlayAgain, onComplete, onClose }: {
-  accuracy: number; moves: number; elapsed: number; bestStreak: number;
-  onPlayAgain: () => void; onComplete: () => void; onClose: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center h-full p-6 text-center" style={{ background: "var(--background)" }}>
-      {/* Star burst SVG */}
-      <div className="bounce-in mb-4">
-        <svg width="80" height="80" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="28" fill="var(--accent-light)" />
-          {[0,45,90,135,180,225,270,315].map((deg, i) => (
-            <line key={i} x1="40" y1="40"
-              x2={40 + 38 * Math.cos((deg * Math.PI) / 180)}
-              y2={40 + 38 * Math.sin((deg * Math.PI) / 180)}
-              stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" opacity="0.6"
-            />
-          ))}
-          <text x="40" y="46" textAnchor="middle" fontSize="24" fill="var(--accent)">✓</text>
-        </svg>
-      </div>
-
-      <h2 className="text-2xl font-bold mb-1" style={{ color: "var(--foreground)" }}>MATCH UP COMPLETE</h2>
-      <p className="text-sm mb-6" style={{ color: "var(--muted-text)" }}>All pairs matched!</p>
-
-      <div className="grid grid-cols-3 gap-4 w-full max-w-sm mb-8">
-        {[
-          { label: "Time", value: formatTime(elapsed) },
-          { label: "Accuracy", value: `${accuracy}%` },
-          { label: "Best Streak", value: `×${bestStreak}` },
-        ].map(({ label, value }) => (
-          <div key={label} className="rounded-xl p-3" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-            <p className="text-xl font-bold" style={{ color: "var(--accent)" }}>{value}</p>
-            <p className="text-xs" style={{ color: "var(--muted-text)" }}>{label}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex flex-col gap-3 w-full max-w-sm">
-        <button onClick={onComplete} className="w-full py-3 rounded-xl font-semibold text-white" style={{ background: "var(--accent)" }}>
-          Continue
-        </button>
-        <button onClick={onClose} className="w-full py-2.5 rounded-xl font-medium text-sm" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--muted-text)" }}>
-          Back to Games
-        </button>
-      </div>
-    </div>
+    </GameShell>
   );
 }

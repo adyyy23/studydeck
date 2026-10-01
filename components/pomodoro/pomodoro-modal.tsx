@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Play, Pause, RotateCcw, Check, Sparkles, BookOpen, Coffee } from "lucide-react";
+import { X, Play, Pause, RotateCcw, Check, Sparkles, BookOpen, Coffee, Timer } from "lucide-react";
 import clsx from "clsx";
 import { useStudyStore } from "@/lib/store/use-study-store";
 import { useAcademicStore } from "@/lib/store/use-academic-store";
@@ -116,33 +116,34 @@ export function PomodoroModal({
     ((durationMinutes * 60 - secondsRemaining) / (durationMinutes * 60)) * 100;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#332821]/50 backdrop-blur-sm animate-fade-in select-none">
       <div
-        className="w-full max-w-md bg-surface rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col min-h-[490px]"
+        className="w-full max-w-md bg-[#F7F3EA] dark:bg-[#221B17] rounded-xl border border-[#D6CCBF] dark:border-[#3D322B] shadow-xl overflow-hidden flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-3.5 border-b border-border bg-gradient-to-r from-amber-500/10 via-surface to-amber-500/10 flex items-center justify-between">
+        <div className="px-4 sm:px-5 py-3.5 border-b border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 uppercase tracking-wider">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FFFBEB] dark:bg-[#382A1E] text-[#B77A45] dark:text-[#D79A45] border border-[#D79A45]/30 uppercase tracking-wider">
               Milo&apos;s Focus Desk
             </span>
-            <h2 className="text-sm font-bold text-foreground">
-              Deep Pomodoro
+            <h2 className="text-xs sm:text-sm font-serif font-black text-[#332821] dark:text-[#F2EEE6]">
+              Deep Study Block
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-surface-muted transition"
+            className="p-1 rounded-lg text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] transition-colors touch-target"
+            aria-label="Close"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 flex-1 flex flex-col justify-between items-center text-center">
+        <div className="p-4 sm:p-6 flex-1 flex flex-col justify-between items-center text-center overflow-y-auto">
           {/* Preset Buttons */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
             {[
               { work: 25, brk: 5, label: "25 / 5" },
               { work: 50, brk: 10, label: "50 / 10" },
@@ -152,10 +153,10 @@ export function PomodoroModal({
                 key={preset.work}
                 onClick={() => handleSelectPreset(preset.work, preset.brk)}
                 className={clsx(
-                  "px-3.5 py-1.5 rounded-xl border text-xs font-bold transition-all",
+                  "px-3.5 py-1.5 rounded-lg border text-xs font-bold transition-colors touch-target",
                   durationMinutes === preset.work
-                    ? "border-amber-500 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 shadow-xs"
-                    : "border-border text-muted-text hover:bg-surface-muted"
+                    ? "border-[#D79A45] bg-[#FFFBEB] dark:bg-[#382A1E] text-[#B77A45] dark:text-[#D79A45]"
+                    : "border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] text-[#756C64] dark:text-[#9E9186] hover:bg-[#EAE3D8]"
                 )}
               >
                 {preset.label}
@@ -164,12 +165,12 @@ export function PomodoroModal({
           </div>
 
           {/* Subject & Goal metadata */}
-          <div className="w-full mt-3 space-y-2">
+          <div className="w-full mt-3 space-y-2 shrink-0">
             {subjects.length > 0 && (
               <select
                 value={selectedSubjectId}
                 onChange={(e) => setSelectedSubjectId(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl border border-border bg-surface text-foreground font-semibold focus:outline-none"
+                className="w-full text-xs p-2.5 rounded-lg border border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] text-[#332821] dark:text-[#F2EEE6] font-semibold focus:outline-none focus:border-[#B77A45]"
               >
                 {subjects.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -184,16 +185,16 @@ export function PomodoroModal({
               value={goal}
               onChange={(e) => setGoal(e.target.value)}
               placeholder="What are you focusing on?"
-              className="w-full text-xs p-2.5 rounded-xl border border-border bg-surface-muted/50 text-foreground focus:outline-none"
+              className="w-full text-xs p-2.5 rounded-lg border border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] text-[#332821] dark:text-[#F2EEE6] focus:outline-none focus:border-[#B77A45]"
             />
           </div>
 
           {/* Milo Mascot Scene */}
-          <div className="my-3 flex flex-col items-center">
+          <div className="my-2 sm:my-3 flex flex-col items-center shrink-0">
             <Character
               character="milo"
               expression={isCompleted ? "celebrating" : isRunning ? "studying" : "neutral"}
-              size="lg"
+              size="md"
               speechBubble={
                 isCompleted
                   ? "Splendid focus! Take a deep breath and sip some tea."
@@ -206,28 +207,28 @@ export function PomodoroModal({
           </div>
 
           {/* Large Countdown Display */}
-          <div className="mb-3">
-            <div className="text-5xl sm:text-6xl font-mono font-black tracking-tight text-foreground">
+          <div className="mb-2 shrink-0">
+            <div className="text-4xl sm:text-5xl font-mono font-black tracking-tight text-[#332821] dark:text-[#F2EEE6]">
               {formatTime(secondsRemaining)}
             </div>
-            <div className="mt-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">
+            <div className="mt-1 text-[10px] sm:text-[11px] font-bold text-[#B77A45] dark:text-[#D79A45] uppercase tracking-widest">
               {isCompleted ? "✓ Focus Goal Complete (+20 SP)" : isRunning ? "Deep Focus in Progress" : "Ready to Start"}
             </div>
           </div>
 
           {/* Progress bar */}
-          <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden mb-5">
+          <div className="w-full bg-[#EAE3D8] dark:bg-[#2E2520] rounded-full h-1.5 overflow-hidden mb-4 shrink-0">
             <div
-              className="bg-amber-500 h-2 rounded-full transition-all duration-300"
+              className="bg-[#D79A45] h-1.5 rounded-full transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
 
-          {/* Actions (Tactile 3D Buttons) */}
-          <div className="flex items-center gap-3 w-full">
+          {/* Actions */}
+          <div className="flex items-center gap-2.5 w-full shrink-0">
             <button
               onClick={handleReset}
-              className="btn-tactile p-3 rounded-xl border border-slate-300 dark:border-slate-700 text-muted-text hover:bg-surface-muted border-b-slate-400"
+              className="btn-secondary p-2.5 sm:p-3 text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] touch-target"
               aria-label="Reset timer"
             >
               <RotateCcw className="w-4 h-4" />
@@ -236,7 +237,7 @@ export function PomodoroModal({
             {isRunning ? (
               <button
                 onClick={() => setIsRunning(false)}
-                className="btn-tactile flex-1 py-3 px-4 rounded-xl border-amber-800 bg-amber-500 hover:bg-amber-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm"
+                className="btn-primary flex-1 py-2.5 sm:py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 touch-target"
               >
                 <Pause className="w-4 h-4 fill-current" />
                 <span>Pause</span>
@@ -244,7 +245,7 @@ export function PomodoroModal({
             ) : (
               <button
                 onClick={() => setIsRunning(true)}
-                className="btn-tactile flex-1 py-3 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs border-amber-800 flex items-center justify-center gap-2 shadow-sm"
+                className="btn-primary flex-1 py-2.5 sm:py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 touch-target"
               >
                 <Play className="w-4 h-4 fill-current" />
                 <span>{secondsRemaining < durationMinutes * 60 ? "Resume" : "Start Focus"}</span>
@@ -268,7 +269,7 @@ export function PomodoroModal({
                 }
                 onClose();
               }}
-              className="btn-tactile py-3 px-4 rounded-xl border border-slate-300 dark:border-slate-700 text-muted-text text-xs font-bold hover:bg-surface-muted border-b-slate-400"
+              className="btn-secondary py-2.5 sm:py-3 px-4 text-xs font-bold uppercase tracking-wider touch-target"
             >
               End
             </button>

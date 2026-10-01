@@ -1,6 +1,6 @@
 {
   "short_name": "StudyDeck",
-  "name": "StudyDeck — Study Smarter. Together.",
+  "name": "StudyDeck — Digital Academic Field Journal",
   "icons": [
     {
       "src": "/icon.svg",
@@ -9,9 +9,9 @@
     }
   ],
   "start_url": "/",
-  "background_color": "#F9FAFB",
-  "theme_color": "#1E3A8A",
+  "background_color": "#F2EEE6",
+  "theme_color": "#49372D",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "scope": "/"
 }

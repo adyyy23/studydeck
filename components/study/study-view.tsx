@@ -19,6 +19,7 @@ import {
   Image as ImageIcon,
   MessageSquare,
   ChevronRight,
+  ChevronDown,
   MoreVertical,
   Clock
 } from "lucide-react";
@@ -63,6 +64,7 @@ export function StudyView() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
     urlSubjectId || (subjects[0]?.id ?? null)
   );
+  const [mobileCoursePickerOpen, setMobileCoursePickerOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState<
     "materials" | "flashcards" | "quizzes" | "mistakes" | "games"
@@ -131,15 +133,66 @@ export function StudyView() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden bg-[#F2EEE6] font-sans text-[#332821]">
-      {/* Left Panel: Course Index / Subjects */}
-      <div className="w-80 border-r border-[#D6CCBF] bg-[#F7F3EA] flex flex-col z-10 shadow-[2px_0_10px_rgba(0,0,0,0.02)]">
-        <div className="p-5 border-b border-[#D6CCBF]">
-          <div className="flex items-center justify-between mb-4">
+    <div className="flex flex-col min-h-[calc(100vh-7rem)] md:flex-row md:h-[calc(100vh-4rem)] md:overflow-hidden bg-[#F2EEE6] font-sans text-[#332821] -m-3 sm:-m-6 md:-m-8">
+      {/* Mobile Course Switcher Bar (< md) */}
+      <div className="md:hidden bg-[#FFFCF6] border-b border-[#D6CCBF] p-3 flex flex-col gap-2 z-20">
+        <div className="flex items-center justify-between gap-2">
+          <button
+            onClick={() => setMobileCoursePickerOpen(!mobileCoursePickerOpen)}
+            className="flex-1 flex items-center justify-between px-3 py-2 bg-[#F7F3EA] border border-[#D6CCBF] rounded-lg text-xs font-bold text-[#332821] touch-target"
+          >
+            <div className="flex items-center gap-2 truncate">
+              <BookOpen className="w-4 h-4 text-[#B77A45] shrink-0" />
+              <span className="truncate">{activeSubject ? `${activeSubject.code}: ${activeSubject.name}` : "Select Course..."}</span>
+            </div>
+            <ChevronDown className={clsx("w-4 h-4 text-[#756C64] shrink-0 transition-transform", mobileCoursePickerOpen && "rotate-180")} />
+          </button>
+          <button
+            onClick={() => setCreateSubjectOpen(true)}
+            className="px-2.5 py-2 bg-[#49372D] text-[#F7F3EA] rounded-lg text-xs font-bold flex items-center gap-1 shrink-0 touch-target"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>New</span>
+          </button>
+        </div>
+
+        {/* Mobile Course Dropdown Sheet */}
+        {mobileCoursePickerOpen && (
+          <div className="mt-1 p-2 bg-[#FFFCF6] border border-[#D6CCBF] rounded-lg shadow-md max-h-60 overflow-y-auto space-y-1 animate-fade-in">
+            {filteredSubjects.map((sub) => {
+              const isSelected = sub.id === selectedSubjectId;
+              return (
+                <button
+                  key={sub.id}
+                  onClick={() => {
+                    setSelectedSubjectId(sub.id);
+                    setMobileCoursePickerOpen(false);
+                  }}
+                  className={clsx(
+                    "w-full text-left p-2.5 rounded-md text-xs transition-colors flex items-center justify-between touch-target",
+                    isSelected ? "bg-[#B77A45]/15 font-bold text-[#B77A45]" : "hover:bg-[#F2EEE6] text-[#332821]"
+                  )}
+                >
+                  <div className="truncate">
+                    <span className="font-mono font-bold mr-2">{sub.code}</span>
+                    <span className="text-[#756C64]">{sub.name}</span>
+                  </div>
+                  {isSelected && <span className="text-[10px] font-black uppercase text-[#B77A45]">Active</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Left Panel: Course Index / Subjects */}
+      <div className="hidden md:flex md:w-72 lg:w-80 border-r border-[#D6CCBF] bg-[#F7F3EA] flex-col shrink-0 z-10 shadow-[2px_0_10px_rgba(0,0,0,0.02)]">
+        <div className="p-4 lg:p-5 border-b border-[#D6CCBF]">
+          <div className="flex items-center justify-between mb-3 lg:mb-4">
             <h2 className="text-[11px] font-bold text-[#756C64] uppercase tracking-widest">My Courses</h2>
             <button
               onClick={() => setCreateSubjectOpen(true)}
-              className="px-2 py-1 flex items-center gap-1 text-[11px] font-bold text-[#B77A45] hover:bg-[#F2EEE6] rounded transition-colors"
+              className="px-2 py-1 flex items-center gap-1 text-[11px] font-bold text-[#B77A45] hover:bg-[#F2EEE6] rounded transition-colors touch-target"
             >
               <Plus className="w-3 h-3" /> New Subject
             </button>
@@ -172,9 +225,9 @@ export function StudyView() {
                 key={subject.id}
                 onClick={() => setSelectedSubjectId(subject.id)}
                 className={clsx(
-                  "w-full text-left p-3 rounded-lg border transition-all duration-200 flex flex-col gap-1",
+                  "w-full text-left p-3 rounded-lg border transition-all duration-200 flex flex-col gap-1 touch-target",
                   isSelected
-                    ? "bg-[#FFFCF6] border-[#D6CCBF] shadow-sm border-l-4 border-l-[#B77A45]"
+                    ? "bg-[#FFFCF6] border-[#D6CCBF] shadow-xs border-l-4 border-l-[#B77A45]"
                     : "bg-transparent border-transparent hover:bg-[#F2EEE6] hover:border-[#D6CCBF]"
                 )}
               >
@@ -207,84 +260,84 @@ export function StudyView() {
       </div>
 
       {/* Right Area: Course Field Journal */}
-      <div className="flex-1 flex flex-col bg-[#F2EEE6] overflow-hidden relative">
+      <div className="flex-1 flex flex-col bg-[#F2EEE6] overflow-y-auto md:overflow-hidden relative">
         {/* Background Texture Pattern */}
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#332821 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
         
         {!activeSubject ? (
-          <div className="flex-1 flex items-center justify-center relative z-10">
-            <div className="text-center space-y-4">
+          <div className="flex-1 flex items-center justify-center p-6 text-center relative z-10">
+            <div className="max-w-sm space-y-4">
               <BookOpen className="w-16 h-16 text-[#D6CCBF] mx-auto" />
               <h2 className="text-xl font-serif font-bold text-[#49372D]">Academic Field Journal</h2>
               <p className="text-sm text-[#756C64]">Select a course from the index to view your notes and training materials.</p>
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col relative z-10">
+          <div className="flex-1 flex flex-col md:overflow-hidden relative z-10">
             {/* Course Header */}
-            <div className="px-8 pt-8 pb-6 bg-[#FFFCF6] border-b border-[#D6CCBF] shadow-sm">
-              <div className="flex items-start justify-between gap-6">
+            <div className="px-4 sm:px-6 lg:px-8 pt-5 sm:pt-7 pb-4 sm:pb-6 bg-[#FFFCF6] border-b border-[#D6CCBF] shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
-                  <h1 className="text-3xl font-serif font-bold text-[#332821] tracking-tight mb-2">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-[#332821] tracking-tight mb-1 sm:mb-2">
                     {activeSubject.code}: {activeSubject.name}
                   </h1>
-                  <div className="flex items-center gap-4 text-xs font-bold text-[#756C64] uppercase tracking-widest">
-                    <span>Fall Semester</span>
+                  <div className="flex items-center gap-3 text-xs font-bold text-[#756C64] uppercase tracking-widest">
+                    <span>Active Semester</span>
                     <span>•</span>
                     <span>{subjectModules.length} Modules</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <button
                     onClick={() => setActiveStudyCards(subjectCards.filter(c => c.state === 'new' || c.nextReviewDate <= new Date().toISOString().split("T")[0]))}
-                    className="px-4 py-2 bg-[#49372D] hover:bg-[#332821] text-[#F7F3EA] text-sm font-bold rounded flex items-center gap-2 transition-colors shadow-sm"
+                    className="px-3.5 py-2 bg-[#49372D] hover:bg-[#332821] text-[#F7F3EA] text-xs sm:text-sm font-bold rounded flex items-center gap-1.5 transition-colors shadow-xs touch-target"
                   >
-                    <Play className="w-4 h-4 fill-current" /> Study Flashcards
+                    <Play className="w-3.5 h-3.5 fill-current" /> Study Deck
                   </button>
                   <button
                     onClick={() => setMaterialUploadOpen(true)}
-                    className="px-4 py-2 bg-[#FFFCF6] hover:bg-[#F2EEE6] text-[#49372D] border border-[#D6CCBF] text-sm font-bold rounded flex items-center gap-2 transition-colors"
+                    className="px-3.5 py-2 bg-[#FFFCF6] hover:bg-[#F2EEE6] text-[#49372D] border border-[#D6CCBF] text-xs sm:text-sm font-bold rounded flex items-center gap-1.5 transition-colors touch-target"
                   >
-                    <Plus className="w-4 h-4" /> Add Material
+                    <Plus className="w-3.5 h-3.5" /> Add Material
                   </button>
                   <button
                     onClick={() => setAiContextDrawerOpen(true)}
-                    className="px-4 py-2 bg-[#FFFCF6] hover:bg-[#F2EEE6] text-[#49372D] border border-[#D6CCBF] text-sm font-bold rounded flex items-center gap-2 transition-colors"
+                    className="px-3.5 py-2 bg-[#FFFCF6] hover:bg-[#F2EEE6] text-[#49372D] border border-[#D6CCBF] text-xs sm:text-sm font-bold rounded flex items-center gap-1.5 transition-colors touch-target"
                   >
-                    <MessageSquare className="w-4 h-4 text-[#8b5cf6]" /> Ask Lumi
+                    <MessageSquare className="w-3.5 h-3.5 text-[#6B4E71]" /> Ask Lumi
                   </button>
                 </div>
               </div>
 
               {masteryStats && (
-                <div className="mt-8 flex items-center gap-6">
+                <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
                   <div className="flex-1">
-                    <div className="flex items-end justify-between mb-2">
-                      <span className="text-sm font-bold text-[#49372D] uppercase tracking-wider">{masteryStats.masteryPercentage}% Mastery</span>
-                      <span className="text-xs text-[#756C64] font-medium">Next Milestone: {Math.min(100, Math.ceil(masteryStats.masteryPercentage / 25) * 25)}%</span>
+                    <div className="flex items-end justify-between mb-1.5">
+                      <span className="text-xs sm:text-sm font-bold text-[#49372D] uppercase tracking-wider">{masteryStats.masteryPercentage}% Mastery</span>
+                      <span className="text-[11px] sm:text-xs text-[#756C64] font-medium">Next Milestone: {Math.min(100, Math.ceil((masteryStats.masteryPercentage + 1) / 25) * 25)}%</span>
                     </div>
                     <div className="h-2 w-full bg-[#F2EEE6] rounded-full overflow-hidden border border-[#D6CCBF]">
                       <div className="h-full bg-[#B77A45]" style={{ width: `${masteryStats.masteryPercentage}%` }} />
                     </div>
                   </div>
                   <div className="flex gap-4 shrink-0">
-                    <div className="text-right">
-                      <span className="block text-2xl font-serif font-bold text-[#332821] leading-none">{masteryStats.dueCards}</span>
+                    <div className="text-left sm:text-right">
+                      <span className="block text-xl sm:text-2xl font-serif font-bold text-[#332821] leading-none">{masteryStats.dueCards}</span>
                       <span className="text-[10px] font-bold text-[#D79A45] uppercase tracking-widest">Cards Due</span>
                     </div>
                     <div className="w-px h-8 bg-[#D6CCBF]" />
-                    <div className="text-right">
-                      <span className="block text-2xl font-serif font-bold text-[#332821] leading-none">{activeSubjectMistakes.length}</span>
-                      <span className="text-[10px] font-bold text-[#ef4444] uppercase tracking-widest">Mistakes</span>
+                    <div className="text-left sm:text-right">
+                      <span className="block text-xl sm:text-2xl font-serif font-bold text-[#332821] leading-none">{activeSubjectMistakes.length}</span>
+                      <span className="text-[10px] font-bold text-[#B84A39] uppercase tracking-widest">Mistakes</span>
                     </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Tab Navigation */}
-            <div className="px-8 bg-[#FFFCF6] border-b border-[#D6CCBF]">
-              <div className="flex items-center gap-8">
+            {/* Tab Navigation - Horizontally Scrollable without truncation */}
+            <div className="px-3 sm:px-6 lg:px-8 bg-[#FFFCF6] border-b border-[#D6CCBF]">
+              <div className="flex items-center gap-3 sm:gap-6 lg:gap-8 overflow-x-auto scrollbar-none py-1">
                 {[
                   { id: "materials", label: "Materials", count: subjectMaterials.length },
                   { id: "flashcards", label: "Flashcards", count: subjectCards.length },
@@ -298,7 +351,7 @@ export function StudyView() {
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as any)}
                       className={clsx(
-                        "relative py-4 flex items-center gap-2 text-sm transition-colors whitespace-nowrap",
+                        "relative py-3.5 flex items-center gap-1.5 text-xs sm:text-sm transition-colors whitespace-nowrap shrink-0 touch-target",
                         isActive
                           ? "font-bold text-[#49372D]"
                           : "font-semibold text-[#756C64] hover:text-[#49372D]"
@@ -307,7 +360,7 @@ export function StudyView() {
                       <span>{tab.label}</span>
                       {tab.count !== null && (
                         <span className={clsx(
-                          "px-2 py-0.5 rounded text-[10px] font-bold",
+                          "px-1.5 py-0.5 rounded text-[10px] font-bold",
                           isActive ? "bg-[#B77A45] text-[#FFFCF6]" : "bg-[#F2EEE6] text-[#756C64]"
                         )}>
                           {tab.count}
@@ -323,7 +376,7 @@ export function StudyView() {
             </div>
 
             {/* Tab Content */}
-            <div className="flex-1 overflow-y-auto p-8">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">
               {activeTab === "materials" && (
                 <div className="max-w-4xl mx-auto space-y-6">
                   {subjectMaterials.length === 0 ? (

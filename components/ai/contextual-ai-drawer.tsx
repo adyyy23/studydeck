@@ -83,23 +83,25 @@ export function ContextualAIDrawer({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/50 backdrop-blur-xs animate-fade-in select-none">
+    <div className="fixed inset-0 z-50 flex justify-end bg-[#332821]/50 backdrop-blur-xs animate-fade-in select-none">
       <div
-        className="w-full max-w-lg bg-surface h-full border-l border-border shadow-2xl flex flex-col justify-between"
+        className="w-full max-w-lg bg-[#F7F3EA] dark:bg-[#221B17] h-full border-l border-[#D6CCBF] dark:border-[#3D322B] shadow-2xl flex flex-col justify-between"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Lumi */}
-        <div className="px-5 py-4 border-b border-border bg-gradient-to-r from-amber-500/10 via-surface to-indigo-500/10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Character character="lumi" expression={loading ? "thinking" : "happy"} size="sm" />
-            <div>
+        <div className="px-4 sm:px-5 py-3.5 border-b border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-[#6B4E71]/15 border border-[#6B4E71]/30 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4 text-[#6B4E71]" />
+            </div>
+            <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black text-foreground">Lumi Study Assistant</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200">
-                  AI Tutor
+                <span className="text-xs sm:text-sm font-serif font-black text-[#332821] dark:text-[#F2EEE6]">Lumi AI Assistant</span>
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#6B4E71]/15 text-[#6B4E71] dark:text-[#D8B4E2] border border-[#6B4E71]/20">
+                  Course Tutor
                 </span>
               </div>
-              <p className="text-xs text-muted-text mt-0.5 truncate max-w-xs">
+              <p className="text-[11px] text-[#756C64] dark:text-[#9E9186] truncate max-w-xs">
                 {contextTitle}
               </p>
             </div>
@@ -107,14 +109,15 @@ export function ContextualAIDrawer({
 
           <button
             onClick={onClose}
-            className="p-1.5 text-muted-text hover:text-foreground rounded-xl hover:bg-surface-muted transition"
+            className="p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] rounded-lg hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] transition-colors touch-target"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Message Stream */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3.5">
           {messages.map((m) => (
             <div
               key={m.id}
@@ -127,12 +130,12 @@ export function ContextualAIDrawer({
               {m.sender === "assistant" && m.groundedInMaterial !== undefined && (
                 <div className="mb-1">
                   {m.groundedInMaterial ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F0FDF4] dark:bg-[#052E16] text-[#3D6B4F] dark:text-[#86EFAC] border border-[#3D6B4F]/30">
                       <Check className="w-3 h-3" />
                       <span>Based on your course notes</span>
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAE3D8] dark:bg-[#2E2520] text-[#756C64] dark:text-[#9E9186] border border-[#D6CCBF] dark:border-[#3D322B]">
                       <span>General academic knowledge</span>
                     </span>
                   )}
@@ -141,10 +144,10 @@ export function ContextualAIDrawer({
 
               <div
                 className={clsx(
-                  "p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-2xs",
+                  "p-3 sm:p-3.5 rounded-xl text-xs sm:text-sm leading-relaxed shadow-xs",
                   m.sender === "user"
-                    ? "bg-blue-600 text-white rounded-br-xs"
-                    : "bg-surface-muted border border-border text-foreground rounded-bl-xs"
+                    ? "bg-[#49372D] text-[#F7F3EA] rounded-br-xs"
+                    : "bg-[#FFFCF6] dark:bg-[#2B231E] border border-[#D6CCBF] dark:border-[#3D322B] text-[#332821] dark:text-[#F2EEE6] rounded-bl-xs"
                 )}
               >
                 {m.content}
@@ -152,38 +155,38 @@ export function ContextualAIDrawer({
 
               {/* Citation quote footer */}
               {m.citation && (
-                <div className="mt-1 text-[11px] text-muted-text italic pl-2 border-l-2 border-accent">
+                <div className="mt-1 text-[11px] text-[#756C64] dark:text-[#9E9186] italic pl-2 border-l-2 border-[#B77A45]">
                   &ldquo;{m.citation}&rdquo;
                 </div>
               )}
 
-              <span className="text-[10px] text-muted-text mt-1 px-1">{m.timestamp}</span>
+              <span className="text-[9px] text-[#756C64] dark:text-[#9E9186] mt-0.5 px-1">{m.timestamp}</span>
             </div>
           ))}
 
           {loading && (
-            <div className="flex items-center gap-2 p-3 rounded-2xl bg-surface-muted text-muted-text text-xs border border-border animate-pulse w-fit">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Lumi is listening and searching your materials...</span>
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-[#FFFCF6] dark:bg-[#2B231E] text-[#756C64] dark:text-[#9E9186] text-xs border border-[#D6CCBF] dark:border-[#3D322B] animate-pulse w-fit">
+              <Sparkles className="w-3.5 h-3.5 text-[#D79A45]" />
+              <span>Lumi is consulting your course materials...</span>
             </div>
           )}
         </div>
 
         {/* Quick Suggestion Chips */}
-        <div className="px-4 py-2 border-t border-border flex items-center gap-1.5 overflow-x-auto scrollbar-none bg-surface-muted/30">
+        <div className="px-3 sm:px-4 py-2 border-t border-[#D6CCBF] dark:border-[#3D322B] flex items-center gap-1.5 overflow-x-auto scrollbar-none bg-[#FFFCF6] dark:bg-[#2B231E] shrink-0">
           {quickActions.map((action, i) => (
             <button
               key={i}
               onClick={() => handleSend(action)}
-              className="text-[11px] font-bold px-2.5 py-1 rounded-full border border-border bg-surface hover:bg-surface-muted text-foreground whitespace-nowrap transition"
+              className="text-[11px] font-bold px-2.5 py-1 rounded-full border border-[#D6CCBF] dark:border-[#3D322B] bg-[#F7F3EA] dark:bg-[#221B17] hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] text-[#332821] dark:text-[#F2EEE6] whitespace-nowrap transition-colors touch-target"
             >
               {action}
             </button>
           ))}
         </div>
 
-        {/* Input Bar */}
-        <div className="p-3 border-t border-border flex items-center gap-2 bg-surface">
+        {/* Input Bar with Safe Area Bottom */}
+        <div className="p-3 border-t border-[#D6CCBF] dark:border-[#3D322B] flex items-center gap-2 bg-[#FFFCF6] dark:bg-[#2B231E] pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shrink-0">
           <input
             type="text"
             value={inputQuery}
@@ -194,14 +197,15 @@ export function ContextualAIDrawer({
                 handleSend();
               }
             }}
-            placeholder="Ask Lumi anything about this subject..."
-            className="flex-1 px-3.5 py-2.5 rounded-xl border border-border bg-surface-muted text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Ask Lumi anything about this course..."
+            className="flex-1 px-3.5 py-2.5 rounded-lg border border-[#D6CCBF] dark:border-[#3D322B] bg-[#F7F3EA] dark:bg-[#221B17] text-xs sm:text-sm text-[#332821] dark:text-[#F2EEE6] focus:outline-none focus:border-[#B77A45]"
           />
 
           <button
             onClick={() => handleSend()}
             disabled={!inputQuery.trim() || loading}
-            className="btn-tactile p-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white border-blue-800 disabled:opacity-40 transition shadow-sm"
+            className="btn-primary p-2.5 rounded-lg text-white disabled:opacity-40 transition-colors shadow-xs touch-target"
+            aria-label="Send Message"
           >
             <Send className="w-4 h-4" />
           </button>

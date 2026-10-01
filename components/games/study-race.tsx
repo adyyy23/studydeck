@@ -1,24 +1,21 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
-  X,
   Trophy,
   Zap,
-  RotateCcw,
-  CheckCircle2,
-  AlertCircle,
   Flag,
   Flame,
-  Award,
+  Clock,
+  RotateCcw,
 } from "lucide-react";
 import clsx from "clsx";
 import { Flashcard, QuizQuestion } from "@/lib/types";
-import { Character } from "@/components/ui/character";
 import { AnimalAvatar } from "@/components/ui/animal-avatar";
 import { useSettingsStore } from "@/lib/store/use-settings-store";
+import { GameShell, GameResultReport } from "./game-shell";
 
-interface GameResult {
+export interface GameResult {
   accuracy: number;
   score: number;
   streak: number;
@@ -29,7 +26,7 @@ interface GameResult {
 interface StudyRaceProps {
   cards: Flashcard[];
   questions?: QuizQuestion[];
-  subjectId: string;
+  subjectId?: string;
   onClose: () => void;
   onComplete: (result: GameResult) => void;
 }
@@ -40,7 +37,6 @@ interface Racer {
   avatarId: "pip" | "milo" | "lumi" | "barnaby" | "toby" | "zara";
   distance: number; // 0 to 100
   isPlayer: boolean;
-  laneColor: string;
 }
 
 export function StudyRace({
@@ -63,10 +59,9 @@ export function StudyRace({
   const playerAvatar = (isAnimal ? selectedAvatarId : "pip") as any;
 
   // Prepare race items
-  const raceItems = React.useMemo(() => {
+  const raceItems = useMemo(() => {
     const list: Array<{ prompt: string; answer: string; options: string[] }> = [];
 
-    // Add cards
     cards.forEach((c) => {
       const wrongOptions = cards
         .filter((other) => other.id !== c.id)
@@ -79,11 +74,10 @@ export function StudyRace({
       list.push({
         prompt: c.front,
         answer: c.back,
-        options: allOptions.length >= 2 ? allOptions : [c.back, "Incorrect alternative"],
+        options: allOptions.length >= 2 ? allOptions : [c.back, "Alternative option"],
       });
     });
 
-    // Add questions if available
     questions.forEach((q) => {
       list.push({
         prompt: q.question,
@@ -95,385 +89,268 @@ export function StudyRace({
     return list.sort(() => 0.5 - Math.random()).slice(0, 8);
   }, [cards, questions]);
 
-  // Racers state
   const [racers, setRacers] = useState<Racer[]>([
-    {
-      id: "player",
-      name: "You",
-      avatarId: playerAvatar,
-      distance: 0,
-      isPlayer: true,
-      laneColor: "border-blue-500 bg-blue-500/10",
-    },
-    {
-      id: "zara",
-      name: "Zara the Quokka",
-      avatarId: "zara",
-      distance: 0,
-      isPlayer: false,
-      laneColor: "border-pink-500 bg-pink-500/10",
-    },
-    {
-      id: "milo",
-      name: "Milo the Capybara",
-      avatarId: "milo",
-      distance: 0,
-      isPlayer: false,
-      laneColor: "border-amber-500 bg-amber-500/10",
-    },
-    {
-      id: "barnaby",
-      name: "Barnaby the Otter",
-      avatarId: "barnaby",
-      distance: 0,
-      isPlayer: false,
-      laneColor: "border-emerald-500 bg-emerald-500/10",
-    },
+    { id: "player", name: "You", avatarId: playerAvatar, distance: 0, isPlayer: true },
+    { id: "ai_1", name: "Pip", avatarId: "pip", distance: 0, isPlayer: false },
+    { id: "ai_2", name: "Milo", avatarId: "milo", distance: 0, isPlayer: false },
+    { id: "ai_3", name: "Lumi", avatarId: "lumi", distance: 0, isPlayer: false },
   ]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
-  const [playerStreak, setPlayerStreak] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [mistakesList, setMistakesList] = useState<
-    Array<{ questionText: string; correctAnswer: string; userAnswer: string }>
-  >([]);
   const [raceFinished, setRaceFinished] = useState(false);
-  const [startTime] = useState(Date.now());
+  const [playerStreak, setPlayerStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
   const [turboActive, setTurboActive] = useState(false);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [mistakesList, setMistakesList] = useState<GameResult["mistakes"]>([]);
+  const [startTime] = useState<number>(Date.now());
+  const [elapsed, setElapsed] = useState(0);
 
-  const currentItem = raceItems[currentIndex] || raceItems[0];
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // AI rival progression interval
+  // Background CPU racer advance
   useEffect(() => {
     if (raceFinished) return;
 
-    const interval = setInterval(() => {
-      setRacers((prev) => {
-        let finished = false;
-        const updated = prev.map((r) => {
+    timerRef.current = setInterval(() => {
+      setElapsed((e) => e + 1);
+
+      setRacers((prev) =>
+        prev.map((r) => {
           if (r.isPlayer) return r;
-          // Random rival advancement: 20% chance of +8m to +15m
-          const advanceChance = Math.random();
-          let newDist = r.distance;
-          if (advanceChance > 0.45) {
-            newDist = Math.min(100, r.distance + Math.floor(Math.random() * 8) + 6);
-          }
-          if (newDist >= 100) finished = true;
+          const cpuAdvance = Math.random() < 0.6 ? Math.floor(Math.random() * 4) + 1 : 0;
+          const newDist = Math.min(100, r.distance + cpuAdvance);
           return { ...r, distance: newDist };
-        });
+        })
+      );
+    }, 1000);
 
-        if (finished) {
-          setRaceFinished(true);
-        }
-        return updated;
-      });
-    }, 1800);
-
-    return () => clearInterval(interval);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [raceFinished]);
 
-  const handleSelectOption = (opt: string) => {
+  const currentItem = raceItems[currentIndex] || {
+    prompt: "Ready to race?",
+    answer: "Yes",
+    options: ["Yes", "Ready"],
+  };
+
+  const handleSelectAnswer = (option: string) => {
     if (isAnswerChecked || raceFinished) return;
-    setSelectedOption(opt);
+
+    setSelectedOption(option);
     setIsAnswerChecked(true);
 
-    const isCorrect = opt === currentItem.answer;
+    const isCorrect = option === currentItem.answer;
 
     if (isCorrect) {
-      setCorrectCount((prev) => prev + 1);
       const newStreak = playerStreak + 1;
       setPlayerStreak(newStreak);
+      if (newStreak > bestStreak) setBestStreak(newStreak);
+      setCorrectCount((c) => c + 1);
 
-      const boost = newStreak >= 2 ? 26 : 20;
-      if (newStreak >= 2) setTurboActive(true);
+      const isTurbo = newStreak >= 3;
+      setTurboActive(isTurbo);
 
-      // Advance player racer
-      setRacers((prev) => {
-        const updated = prev.map((r) => {
+      const boost = isTurbo ? 22 : 14;
+
+      setRacers((prev) =>
+        prev.map((r) => {
           if (!r.isPlayer) return r;
-          const nextDist = Math.min(100, r.distance + boost);
-          if (nextDist >= 100) {
-            setTimeout(() => setRaceFinished(true), 300);
-          }
-          return { ...r, distance: nextDist };
-        });
-        return updated;
-      });
+          const newDist = Math.min(100, r.distance + boost);
+          if (newDist >= 100) setRaceFinished(true);
+          return { ...r, distance: newDist };
+        })
+      );
     } else {
       setPlayerStreak(0);
       setTurboActive(false);
+
       setMistakesList((prev) => [
         ...prev,
         {
           questionText: currentItem.prompt,
           correctAnswer: currentItem.answer,
-          userAnswer: opt,
+          userAnswer: option,
         },
       ]);
     }
 
-    // Auto next question after 800ms
     setTimeout(() => {
-      setTurboActive(false);
-      if (currentIndex + 1 < raceItems.length) {
+      if (currentIndex + 1 < raceItems.length && !raceFinished) {
         setCurrentIndex((i) => i + 1);
         setSelectedOption(null);
         setIsAnswerChecked(false);
       } else {
         setRaceFinished(true);
       }
-    }, 900);
+    }, 800);
   };
 
-  // Rank calculation
   const sortedRacers = [...racers].sort((a, b) => b.distance - a.distance);
   const playerRank = sortedRacers.findIndex((r) => r.isPlayer) + 1;
+  const playerDist = racers.find((r) => r.isPlayer)?.distance || 0;
 
-  const handleFinish = () => {
-    const duration = Math.round((Date.now() - startTime) / 1000);
-    const accuracy = raceItems.length > 0 ? Math.round((correctCount / raceItems.length) * 100) : 100;
-    const score = correctCount * 120 + (playerRank === 1 ? 250 : playerRank === 2 ? 150 : 50);
-
-    addStudyPoints(playerRank === 1 ? 50 : 25);
-
-    onComplete({
-      accuracy,
-      score,
-      streak: playerStreak,
-      durationSeconds: duration,
-      mistakes: mistakesList,
-    });
+  const restartRace = () => {
+    setRacers([
+      { id: "player", name: "You", avatarId: playerAvatar, distance: 0, isPlayer: true },
+      { id: "ai_1", name: "Pip", avatarId: "pip", distance: 0, isPlayer: false },
+      { id: "ai_2", name: "Milo", avatarId: "milo", distance: 0, isPlayer: false },
+      { id: "ai_3", name: "Lumi", avatarId: "lumi", distance: 0, isPlayer: false },
+    ]);
+    setCurrentIndex(0);
+    setSelectedOption(null);
+    setIsAnswerChecked(false);
+    setRaceFinished(false);
+    setPlayerStreak(0);
+    setCorrectCount(0);
+    setMistakesList([]);
+    setElapsed(0);
   };
 
+  if (raceFinished) {
+    const accuracy = raceItems.length > 0 ? Math.round((correctCount / raceItems.length) * 100) : 100;
+    const score = correctCount * 120 + (playerRank === 1 ? 250 : playerRank === 2 ? 150 : 50);
+    const xpReward = playerRank === 1 ? 50 : 25;
+    addStudyPoints(xpReward);
+
+    const result: GameResult = {
+      accuracy,
+      score,
+      streak: bestStreak,
+      durationSeconds: elapsed,
+      mistakes: mistakesList,
+    };
+
+    return (
+      <GameShell title="Study Race Track" onExit={onClose}>
+        <GameResultReport
+          title={playerRank === 1 ? "1st Place Winner! 🏆" : `Finished Rank #${playerRank}`}
+          score={score}
+          accuracy={accuracy}
+          streak={bestStreak}
+          xp={xpReward}
+          isPersonalBest={playerRank === 1}
+          onPlayAgain={restartRace}
+          onComplete={() => onComplete(result)}
+          onClose={onClose}
+        />
+      </GameShell>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 select-none animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Header Bar */}
-        <div className="px-5 py-3.5 border-b border-border bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 text-white flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-300" />
-            <h3 className="text-sm font-black tracking-tight">Study Race Track</h3>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 uppercase tracking-widest">
-              100M Sprint
+    <GameShell
+      title="Study Race Track"
+      badge="Sprint Challenge"
+      onExit={onClose}
+      progressPercent={playerDist}
+      metrics={[
+        { label: "Rank", value: `#${playerRank}`, highlight: playerRank === 1 },
+        { label: "Streak", value: `×${playerStreak}`, highlight: playerStreak > 1 },
+        { label: "Question", value: `${currentIndex + 1}/${raceItems.length}` },
+      ]}
+    >
+      <div className="max-w-3xl mx-auto w-full flex flex-col gap-4">
+        {/* Race Track Arena */}
+        <div className="p-3 sm:p-5 rounded-xl bg-[#221B17] border border-[#3D322B] text-[#F2EEE6] shadow-sm flex flex-col gap-3">
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-[#9E9186] font-bold px-1 border-b border-[#3D322B] pb-1.5">
+            <span>START</span>
+            <span>25M</span>
+            <span>50M</span>
+            <span>75M</span>
+            <span className="flex items-center gap-1 text-[#D79A45] font-black">
+              <Flag className="w-3 h-3" /> FINISH
             </span>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-full hover:bg-white/20 transition-colors"
-          >
-            <X className="w-4 h-4 text-white" />
-          </button>
+
+          {/* 4 Lanes */}
+          <div className="space-y-2">
+            {racers.map((racer) => (
+              <div key={racer.id} className="relative flex items-center">
+                <div className="w-full h-8 rounded-md bg-[#2B231E] border border-[#3D322B] relative overflow-hidden flex items-center px-1.5">
+                  <div
+                    className={clsx(
+                      "absolute left-0 top-0 bottom-0 transition-all duration-500 opacity-25",
+                      racer.isPlayer ? "bg-[#B77A45]" : "bg-[#756C64]"
+                    )}
+                    style={{ width: `${racer.distance}%` }}
+                  />
+
+                  <div
+                    className="absolute transition-all duration-500 ease-out flex items-center gap-1.5"
+                    style={{ left: `calc(${Math.min(92, racer.distance)}% * 0.9)` }}
+                  >
+                    <AnimalAvatar
+                      avatarId={racer.avatarId}
+                      accessory={racer.isPlayer ? avatarAccessory : "none"}
+                      size="xs"
+                      showBorder={true}
+                    />
+                    <span
+                      className={clsx(
+                        "text-[9px] font-bold px-1 py-0.2 rounded shadow-xs whitespace-nowrap",
+                        racer.isPlayer
+                          ? "bg-[#B77A45] text-white"
+                          : "bg-[#3D322B] text-[#9E9186]"
+                      )}
+                    >
+                      {racer.name}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {turboActive && (
+            <div className="flex items-center gap-1 text-[#D79A45] font-black text-xs self-end animate-pulse">
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span>TURBO BOOST ACTIVE!</span>
+            </div>
+          )}
         </div>
 
-        {/* Content Body */}
-        {!raceFinished ? (
-          <div className="p-4 sm:p-6 flex flex-col gap-4 overflow-y-auto">
-            {/* Visual Race Track */}
-            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-white shadow-inner flex flex-col gap-3">
-              <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold px-1 border-b border-slate-800 pb-1">
-                <span>START</span>
-                <span>25M</span>
-                <span>50M</span>
-                <span>75M</span>
-                <span className="flex items-center gap-1 text-amber-400 font-black">
-                  <Flag className="w-3 h-3" /> FINISH
-                </span>
-              </div>
+        {/* Current Question / Prompt */}
+        <div className="p-4 sm:p-5 rounded-xl border border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E]">
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#B77A45] block mb-1">
+            Question {currentIndex + 1} of {raceItems.length} — Answer to Sprint!
+          </span>
+          <p className="text-sm sm:text-base font-serif font-black text-[#332821] dark:text-[#F2EEE6] leading-snug">
+            {currentItem.prompt}
+          </p>
+        </div>
 
-              {/* 4 Lanes */}
-              <div className="space-y-2.5">
-                {racers.map((racer) => (
-                  <div key={racer.id} className="relative flex items-center">
-                    {/* Lane track line */}
-                    <div className="w-full h-8 rounded-lg bg-slate-800/80 border border-slate-700/60 relative overflow-hidden flex items-center px-2">
-                      {/* Distance progress fill */}
-                      <div
-                        className={clsx(
-                          "absolute left-0 top-0 bottom-0 transition-all duration-500 opacity-20",
-                          racer.isPlayer ? "bg-blue-500" : "bg-slate-400"
-                        )}
-                        style={{ width: `${racer.distance}%` }}
-                      />
+        {/* Options Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {currentItem.options.map((opt, idx) => {
+            const isSelected = selectedOption === opt;
+            const isCorrect = isAnswerChecked && opt === currentItem.answer;
+            const isWrong = isAnswerChecked && isSelected && opt !== currentItem.answer;
 
-                      {/* Moving Animal Avatar */}
-                      <div
-                        className="absolute transition-all duration-500 ease-out flex items-center gap-1.5"
-                        style={{ left: `calc(${racer.distance}% * 0.85)` }}
-                      >
-                        <AnimalAvatar
-                          avatarId={racer.avatarId}
-                          accessory={racer.isPlayer ? avatarAccessory : "none"}
-                          size="xs"
-                          showBorder={true}
-                        />
-                        <span
-                          className={clsx(
-                            "text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap",
-                            racer.isPlayer
-                              ? "bg-blue-600 text-white"
-                              : "bg-slate-700 text-slate-200"
-                          )}
-                        >
-                          {racer.name} {racer.distance}m
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Player Status / Turbo indicator */}
-              <div className="flex items-center justify-between pt-1 text-xs">
-                <span className="text-slate-400 font-semibold">
-                  Current Rank: <strong className="text-white">#{playerRank}</strong>
-                </span>
-                {turboActive && (
-                  <div className="flex items-center gap-1 text-amber-400 font-black animate-bounce text-xs">
-                    <Zap className="w-3.5 h-3.5 fill-amber-400" />
-                    <span>TURBO SPRINT BOOST!</span>
-                  </div>
+            return (
+              <button
+                key={idx}
+                onClick={() => handleSelectAnswer(opt)}
+                disabled={isAnswerChecked}
+                className={clsx(
+                  "p-3 rounded-lg border text-xs sm:text-sm font-semibold text-left transition-all duration-150 min-h-[50px] flex items-center justify-between touch-target",
+                  isCorrect && "bg-[#EBF3ED] border-[#3D6B4F] text-[#3D6B4F]",
+                  isWrong && "bg-[#FBEBEB] border-[#B84A39] text-[#B84A39]",
+                  !isAnswerChecked && isSelected && "border-[#B77A45] bg-[#EAE3D8]",
+                  !isAnswerChecked && !isSelected && "bg-[#FFFCF6] dark:bg-[#2B231E] border-[#D6CCBF] dark:border-[#3D322B] hover:border-[#B77A45] hover:bg-[#F2EEE6] text-[#29231F] dark:text-[#F2EEE6]"
                 )}
-                {playerStreak > 1 && (
-                  <div className="flex items-center gap-1 text-orange-400 font-bold text-xs">
-                    <Flame className="w-3.5 h-3.5 fill-orange-400" />
-                    <span>{playerStreak}x Combo</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Current Question / Flashcard prompt */}
-            <div className="p-4 rounded-2xl bg-surface-muted/60 border border-border flex flex-col gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                Question {currentIndex + 1} of {raceItems.length} — Answer to Sprint!
-              </span>
-              <p className="text-sm font-bold text-foreground leading-snug">
-                {currentItem.prompt}
-              </p>
-            </div>
-
-            {/* Multiple Choice Options (Tactile Buttons) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {currentItem.options.map((opt, idx) => {
-                const isSelected = selectedOption === opt;
-                const isCorrect = opt === currentItem.answer;
-
-                let btnStyle = "bg-surface hover:bg-surface-muted text-foreground border-slate-300 dark:border-slate-700 border-b-slate-400";
-
-                if (isAnswerChecked) {
-                  if (isCorrect) {
-                    btnStyle = "bg-emerald-600 text-white border-emerald-800";
-                  } else if (isSelected) {
-                    btnStyle = "bg-rose-600 text-white border-rose-800";
-                  } else {
-                    btnStyle = "opacity-40 bg-surface text-foreground border-slate-300";
-                  }
-                }
-
-                return (
-                  <button
-                    key={idx}
-                    disabled={isAnswerChecked}
-                    onClick={() => handleSelectOption(opt)}
-                    className={clsx(
-                      "btn-tactile p-3 rounded-2xl border text-left text-xs font-bold transition-all shadow-xs flex items-center justify-between",
-                      btnStyle
-                    )}
-                  >
-                    <span>{opt}</span>
-                    {isAnswerChecked && isCorrect && <CheckCircle2 className="w-4 h-4 shrink-0" />}
-                    {isAnswerChecked && isSelected && !isCorrect && (
-                      <AlertCircle className="w-4 h-4 shrink-0" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          /* ================= FINISH PODIUM SCREEN ================= */
-          <div className="p-6 sm:p-8 text-center flex flex-col items-center gap-4 animate-fade-in overflow-y-auto">
-            <Character
-              character={playerAvatar}
-              expression={playerRank === 1 ? "celebrating" : "happy"}
-              size="lg"
-              speechBubble={
-                playerRank === 1
-                  ? "VICTORY! First place on the track!"
-                  : `Great race! You finished in rank #${playerRank}!`
-              }
-              bubblePosition="top"
-            />
-
-            <div>
-              <h2 className="text-2xl font-black text-foreground">
-                {playerRank === 1 ? "1st Place Winner! 🏆" : `Race Completed — #${playerRank}`}
-              </h2>
-              <p className="text-xs text-muted-text mt-1">
-                You sprinted with deliberate recall! Study Points added to your balance.
-              </p>
-            </div>
-
-            {/* Score & Accuracy Card */}
-            <div className="w-full max-w-sm grid grid-cols-3 gap-2.5 p-3 rounded-2xl bg-surface-muted border border-border">
-              <div>
-                <span className="text-[10px] text-muted-text font-bold uppercase">Accuracy</span>
-                <div className="text-lg font-black text-blue-600">
-                  {Math.round((correctCount / Math.max(1, raceItems.length)) * 100)}%
-                </div>
-              </div>
-              <div>
-                <span className="text-[10px] text-muted-text font-bold uppercase">Rank</span>
-                <div className="text-lg font-black text-amber-500">#{playerRank}</div>
-              </div>
-              <div>
-                <span className="text-[10px] text-muted-text font-bold uppercase">Points</span>
-                <div className="text-lg font-black text-emerald-600">
-                  +{playerRank === 1 ? 50 : 25} SP
-                </div>
-              </div>
-            </div>
-
-            {/* Podium Placement List */}
-            <div className="w-full max-w-sm space-y-1.5 text-left">
-              <span className="text-[10px] font-black uppercase tracking-wider text-muted-text">
-                Final Leaderboard:
-              </span>
-              {sortedRacers.map((racer, idx) => (
-                <div
-                  key={racer.id}
-                  className={clsx(
-                    "flex items-center justify-between p-2 rounded-xl border text-xs font-bold",
-                    racer.isPlayer
-                      ? "bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-800 text-blue-900 dark:text-blue-200"
-                      : "bg-surface border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 text-center font-black">
-                      {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "4th"}
-                    </span>
-                    <AnimalAvatar avatarId={racer.avatarId} size="xs" />
-                    <span>{racer.name}</span>
-                  </div>
-                  <span>{racer.distance}m</span>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={handleFinish}
-              className="btn-tactile w-full max-w-sm py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm border-blue-800 shadow-md mt-2"
-            >
-              Collect Rewards & Return
-            </button>
-          </div>
-        )}
+              >
+                <span>{opt}</span>
+                {isCorrect && <span className="text-xs font-bold text-[#3D6B4F]">✓ Sprint!</span>}
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </GameShell>
   );
 }
-
-export default StudyRace;

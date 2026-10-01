@@ -146,21 +146,21 @@ export function HomeView() {
   };
 
   return (
-    <div className="animate-fade-in select-none bg-[#F2EEE6] min-h-screen p-4 sm:p-6 lg:p-8 -m-4 sm:-m-6 lg:-m-8">
+    <div className="animate-fade-in select-none bg-[#F2EEE6] min-h-screen">
       {/* 1. TOP HEADER: Field Journal Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-serif font-black text-[#332821]">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-serif font-black text-[#332821]">
           {getGreeting()}, {user?.firstName || "Student"}.
         </h1>
-        <p className="text-sm font-medium text-[#756C64] mt-1">
+        <p className="text-xs sm:text-sm font-medium text-[#756C64] mt-1">
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} • Your study plan is ready.
         </p>
         
         {/* Student Progression strip integrated */}
-        <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-3">
-            <span className="font-bold text-sm text-[#49372D]">LV. {levelInfo.level} — NOVICE</span>
-            <div className="w-32 h-1.5 bg-[#D6CCBF] rounded-full overflow-hidden">
+            <span className="font-bold text-xs sm:text-sm text-[#49372D]">LV. {levelInfo.level} — NOVICE</span>
+            <div className="w-24 sm:w-32 h-1.5 bg-[#D6CCBF] rounded-full overflow-hidden">
               <div 
                 className="h-full bg-[#D79A45] transition-all duration-500" 
                 style={{ width: `${Math.min(100, (levelInfo.currentXP / levelInfo.nextLevelXP) * 100)}%` }} 
@@ -169,39 +169,45 @@ export function HomeView() {
             <span className="text-xs font-bold text-[#B77A45]">{levelInfo.currentXP} / {levelInfo.nextLevelXP} XP</span>
           </div>
           
-          <div className="flex items-center gap-4 sm:ml-auto">
+          <div className="flex items-center gap-3 sm:gap-4 sm:ml-auto">
             <div className="flex items-center gap-1.5">
               <Flame className="w-4 h-4 text-[#B77A45] fill-[#B77A45]" />
-              <span className="font-bold text-[#B77A45] text-sm">{streak}d streak</span>
+              <span className="font-bold text-[#B77A45] text-xs sm:text-sm">{streak}d streak</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Star className="w-4 h-4 text-[#D79A45] fill-[#D79A45]" />
-              <span className="font-bold text-[#D79A45] text-sm">★ {studyPoints} SP</span>
+              <span className="font-bold text-[#D79A45] text-xs sm:text-sm">★ {studyPoints} SP</span>
             </div>
-            <div className="text-xs font-bold text-[#756C64]">
-              Daily Goal: {todayMinutes}/{dailyGoalMinutes || 30} min
+            <div className="text-[11px] sm:text-xs font-bold text-[#756C64]">
+              Goal: {todayMinutes}/{dailyGoalMinutes || 30}m
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. TODAY'S JOURNEY: Connected Horizontal Progression Track */}
-      <div className="bg-[#F7F3EA] border border-[#D6CCBF] rounded-xl p-5 mb-6 relative shadow-sm">
-        <div className="text-xs font-black text-[#756C64] uppercase tracking-widest mb-6">Today's Journey</div>
+      {/* 2. TODAY'S JOURNEY: Connected Horizontal Progression Track (Desktop) + Vertical Quest Path (Mobile) */}
+      <div className="bg-[#F7F3EA] border border-[#D6CCBF] rounded-xl p-4 sm:p-5 mb-6 relative shadow-xs">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className="text-xs font-black text-[#756C64] uppercase tracking-widest">Today&apos;s Journey</div>
+          <div className="flex items-center gap-1.5 text-[#756C64] bg-[#F2EEE6] px-2.5 py-1 rounded-md border border-[#D6CCBF] text-[10px] sm:text-xs">
+            <span className="font-bold text-[#B77A45]">Barnaby:</span> +140 XP for full track
+          </div>
+        </div>
         
-        <div className="relative flex items-center justify-between max-w-3xl mx-auto mb-2 px-4 sm:px-12">
+        {/* Desktop / Tablet Horizontal Track */}
+        <div className="hidden sm:flex relative items-center justify-between max-w-3xl mx-auto mb-2 px-4 sm:px-12">
           {/* Connecting line */}
           <div className="absolute top-4 left-[10%] right-[10%] h-[2px] bg-[#D6CCBF] -z-10" />
           
           {/* Node 1: Review */}
-          <button onClick={() => router.push("/study")} className="flex flex-col items-center gap-2 group w-16 sm:w-24">
+          <button onClick={() => router.push("/study")} className="flex flex-col items-center gap-2 group w-24 touch-target">
             <div className="text-sm font-bold text-[#332821] group-hover:text-[#B77A45] transition-colors">Review</div>
             {dueCardsCount === 0 ? (
               <div className="w-8 h-8 rounded-full bg-[#8A9A86] text-white flex items-center justify-center border-2 border-[#F7F3EA] z-10"><CheckCircle2 className="w-5 h-5" /></div>
             ) : (
-              <div className="w-8 h-8 rounded-full bg-[#B77A45] text-white flex items-center justify-center border-2 border-[#F7F3EA] shadow-sm z-10"><Circle className="w-3 h-3 fill-current" /></div>
+              <div className="w-8 h-8 rounded-full bg-[#B77A45] text-white flex items-center justify-center border-2 border-[#F7F3EA] shadow-xs z-10"><Circle className="w-3 h-3 fill-current" /></div>
             )}
-            <div className="text-xs text-[#756C64] hidden sm:block">{dueCardsCount === 0 ? "8 cards" : `${dueCardsCount} cards`}</div>
+            <div className="text-xs text-[#756C64]">{dueCardsCount === 0 ? "8 cards" : `${dueCardsCount} cards`}</div>
             {dueCardsCount === 0 ? (
               <div className="text-[10px] font-bold text-[#8A9A86]">DONE</div>
             ) : (
@@ -210,14 +216,14 @@ export function HomeView() {
           </button>
           
           {/* Node 2: Practice */}
-          <button onClick={() => router.push("/study")} className="flex flex-col items-center gap-2 group w-16 sm:w-24">
+          <button onClick={() => router.push("/study")} className="flex flex-col items-center gap-2 group w-24 touch-target">
             <div className="text-sm font-bold text-[#332821] group-hover:text-[#B77A45] transition-colors">Practice</div>
             {quest2Done ? (
               <div className="w-8 h-8 rounded-full bg-[#8A9A86] text-white flex items-center justify-center border-2 border-[#F7F3EA] z-10"><CheckCircle2 className="w-5 h-5" /></div>
             ) : (
               <div className="w-8 h-8 rounded-full border-2 border-[#D6CCBF] bg-[#FFFCF6] text-[#D6CCBF] flex items-center justify-center z-10"><Circle className="w-3 h-3" /></div>
             )}
-            <div className="text-xs text-[#756C64] hidden sm:block">Quiz</div>
+            <div className="text-xs text-[#756C64]">Quiz</div>
             {quest2Done ? (
               <div className="text-[10px] font-bold text-[#8A9A86]">DONE</div>
             ) : (
@@ -226,22 +232,22 @@ export function HomeView() {
           </button>
 
           {/* Node 3: Challenge */}
-          <button onClick={() => router.push("/study?tab=games")} className="flex flex-col items-center gap-2 group w-16 sm:w-24">
+          <button onClick={() => router.push("/study?tab=games")} className="flex flex-col items-center gap-2 group w-24 touch-target">
             <div className="text-sm font-bold text-[#332821] group-hover:text-[#B77A45] transition-colors">Challenge</div>
             <div className="w-8 h-8 rounded-full border-2 border-[#D6CCBF] bg-[#FFFCF6] text-[#D6CCBF] flex items-center justify-center z-10"><Circle className="w-3 h-3" /></div>
-            <div className="text-xs text-[#756C64] hidden sm:block">Game</div>
+            <div className="text-xs text-[#756C64]">Game</div>
             <div className="text-[10px] font-bold text-[#B77A45]">+50 XP</div>
           </button>
 
           {/* Node 4: Focus */}
-          <button onClick={() => setPomodoroOpen(true)} className="flex flex-col items-center gap-2 group w-16 sm:w-24">
+          <button onClick={() => setPomodoroOpen(true)} className="flex flex-col items-center gap-2 group w-24 touch-target">
             <div className="text-sm font-bold text-[#332821] group-hover:text-[#B77A45] transition-colors">Focus</div>
             {quest3Done ? (
               <div className="w-8 h-8 rounded-full bg-[#8A9A86] text-white flex items-center justify-center border-2 border-[#F7F3EA] z-10"><CheckCircle2 className="w-5 h-5" /></div>
             ) : (
                <div className="w-8 h-8 rounded-full border-2 border-[#D6CCBF] bg-[#FFFCF6] text-[#D6CCBF] flex items-center justify-center z-10"><Circle className="w-3 h-3" /></div>
             )}
-            <div className="text-xs text-[#756C64] hidden sm:block">25 min</div>
+            <div className="text-xs text-[#756C64]">25 min</div>
             {quest3Done ? (
               <div className="text-[10px] font-bold text-[#8A9A86]">DONE</div>
             ) : (
@@ -249,10 +255,105 @@ export function HomeView() {
             )}
           </button>
         </div>
-        
-        {/* Barnaby hint */}
-        <div className="mt-4 sm:absolute sm:top-4 sm:right-4 flex items-center gap-2 text-[#756C64] bg-[#F2EEE6] px-3 py-1.5 rounded-lg border border-[#D6CCBF] text-[10px] sm:text-xs">
-           <span className="font-bold text-[#B77A45]">Barnaby's Study Guide:</span> Complete today's track to earn +140 XP.
+
+        {/* Mobile Vertical Quest Path (< 640px) */}
+        <div className="sm:hidden relative flex flex-col gap-3 pl-2">
+          {/* Vertical Connecting Rule */}
+          <div className="absolute left-[22px] top-4 bottom-4 w-0.5 bg-[#D6CCBF] z-0" />
+
+          {/* Step 1: Review */}
+          <button
+            onClick={() => router.push("/study")}
+            className="relative z-10 flex items-center justify-between p-2.5 rounded-lg bg-[#FFFCF6] border border-[#D6CCBF] text-left touch-target"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              {dueCardsCount === 0 ? (
+                <div className="w-7 h-7 rounded-full bg-[#8A9A86] text-white flex items-center justify-center shrink-0 border-2 border-[#F7F3EA]">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-[#B77A45] text-white flex items-center justify-center shrink-0 border-2 border-[#F7F3EA] shadow-xs">
+                  <Circle className="w-2.5 h-2.5 fill-current" />
+                </div>
+              )}
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#332821]">1. Review Flashcards</div>
+                <div className="text-[11px] text-[#756C64] truncate">{dueCardsCount === 0 ? "All 8 cards reviewed" : `${dueCardsCount} cards ready for recall`}</div>
+              </div>
+            </div>
+            <span className={clsx("text-[10px] font-bold px-2 py-0.5 rounded shrink-0", dueCardsCount === 0 ? "bg-[#8A9A86]/20 text-[#8A9A86]" : "bg-[#B77A45]/15 text-[#B77A45]")}>
+              {dueCardsCount === 0 ? "DONE" : "+20 XP"}
+            </span>
+          </button>
+
+          {/* Step 2: Practice */}
+          <button
+            onClick={() => router.push("/study")}
+            className="relative z-10 flex items-center justify-between p-2.5 rounded-lg bg-[#FFFCF6] border border-[#D6CCBF] text-left touch-target"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              {quest2Done ? (
+                <div className="w-7 h-7 rounded-full bg-[#8A9A86] text-white flex items-center justify-center shrink-0 border-2 border-[#F7F3EA]">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+              ) : (
+                <div className="w-7 h-7 rounded-full border-2 border-[#D6CCBF] bg-[#FFFCF6] text-[#756C64] flex items-center justify-center shrink-0">
+                  <span className="text-[10px] font-bold">2</span>
+                </div>
+              )}
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#332821]">2. Practice Quiz</div>
+                <div className="text-[11px] text-[#756C64] truncate">Test your comprehension</div>
+              </div>
+            </div>
+            <span className={clsx("text-[10px] font-bold px-2 py-0.5 rounded shrink-0", quest2Done ? "bg-[#8A9A86]/20 text-[#8A9A86]" : "bg-[#B77A45]/15 text-[#B77A45]")}>
+              {quest2Done ? "DONE" : "+30 XP"}
+            </span>
+          </button>
+
+          {/* Step 3: Challenge */}
+          <button
+            onClick={() => router.push("/study?tab=games")}
+            className="relative z-10 flex items-center justify-between p-2.5 rounded-lg bg-[#FFFCF6] border border-[#D6CCBF] text-left touch-target"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-7 h-7 rounded-full border-2 border-[#D6CCBF] bg-[#FFFCF6] text-[#756C64] flex items-center justify-center shrink-0">
+                <span className="text-[10px] font-bold">3</span>
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#332821]">3. Study Challenge</div>
+                <div className="text-[11px] text-[#756C64] truncate">Play an arcade recall game</div>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#B77A45]/15 text-[#B77A45] shrink-0">
+              +50 XP
+            </span>
+          </button>
+
+          {/* Step 4: Focus */}
+          <button
+            onClick={() => setPomodoroOpen(true)}
+            className="relative z-10 flex items-center justify-between p-2.5 rounded-lg bg-[#FFFCF6] border border-[#D6CCBF] text-left touch-target"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              {quest3Done ? (
+                <div className="w-7 h-7 rounded-full bg-[#8A9A86] text-white flex items-center justify-center shrink-0 border-2 border-[#F7F3EA]">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+              ) : (
+                <div className="w-7 h-7 rounded-full border-2 border-[#D6CCBF] bg-[#FFFCF6] text-[#756C64] flex items-center justify-center shrink-0">
+                  <span className="text-[10px] font-bold">4</span>
+                </div>
+              )}
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#332821]">4. Focus Session</div>
+                <div className="text-[11px] text-[#756C64] truncate">Complete 25 min with Milo</div>
+              </div>
+            </div>
+            <span className={clsx("text-[10px] font-bold px-2 py-0.5 rounded shrink-0", quest3Done ? "bg-[#8A9A86]/20 text-[#8A9A86]" : "bg-[#B77A45]/15 text-[#B77A45]")}>
+              {quest3Done ? "DONE" : "+40 XP"}
+            </span>
+          </button>
         </div>
       </div>
 

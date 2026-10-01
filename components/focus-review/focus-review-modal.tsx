@@ -118,18 +118,15 @@ export function FocusReviewModal({
         setMistakesResolved((m) => m + 1);
         setCorrectAnswersCount((c) => c + 1);
       }
+      setTotalQuestionsTested((t) => t + 1);
     }
-    setTotalQuestionsTested((t) => t + 1);
 
+    setIsFlipped(false);
     if (itemIndex + 1 < queue.activeMistakes.length) {
       setItemIndex((prev) => prev + 1);
-      setUserSelectedOption("");
-      setHasCheckedAnswer(false);
     } else {
-      // Move to stage 3: questions
+      // Move to stage 3: curriculum questions
       setItemIndex(0);
-      setUserSelectedOption("");
-      setHasCheckedAnswer(false);
       if (queue.practiceQuestions.length > 0) {
         setStage("questions");
       } else {
@@ -139,12 +136,11 @@ export function FocusReviewModal({
   };
 
   const handleCheckQuestion = () => {
-    const currentQ = queue.practiceQuestions[itemIndex];
-    if (!currentQ || !userSelectedOption) return;
-
+    if (!userSelectedOption) return;
     setHasCheckedAnswer(true);
+    const curr = queue.practiceQuestions[itemIndex];
     const isCorrect =
-      userSelectedOption.trim().toLowerCase() === currentQ.correctAnswer.trim().toLowerCase();
+      userSelectedOption.trim().toLowerCase() === curr.correctAnswer.trim().toLowerCase();
 
     if (isCorrect) {
       setCorrectAnswersCount((c) => c + 1);
@@ -153,10 +149,11 @@ export function FocusReviewModal({
   };
 
   const handleNextQuestion = () => {
+    setHasCheckedAnswer(false);
+    setUserSelectedOption("");
+
     if (itemIndex + 1 < queue.practiceQuestions.length) {
       setItemIndex((prev) => prev + 1);
-      setUserSelectedOption("");
-      setHasCheckedAnswer(false);
     } else {
       finishSession();
     }
@@ -164,43 +161,41 @@ export function FocusReviewModal({
 
   const finishSession = () => {
     setStep("summary");
-    const accuracy =
-      totalQuestionsTested > 0
-        ? Math.round((correctAnswersCount / totalQuestionsTested) * 100)
-        : 100;
-
     if (user) {
       logSession({
         userId: user.id,
-        type: "focus_review",
+        type: "pomodoro",
         durationMinutes: targetDurationMinutes,
-        accuracy,
-        cardsImproved,
-        mistakesResolved,
+        accuracy:
+          totalQuestionsTested > 0
+            ? Math.round((correctAnswersCount / totalQuestionsTested) * 100)
+            : 100,
+        itemsReviewed: cardsImproved + mistakesResolved + totalQuestionsTested,
         notes: "Completed signature 25-minute Focus Review",
       });
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#332821]/50 backdrop-blur-sm animate-fade-in">
       <div
-        className="w-full max-w-lg bg-surface rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col min-h-[460px] max-h-[90vh]"
+        className="w-full max-w-lg bg-[#F7F3EA] dark:bg-[#221B17] rounded-xl border border-[#D6CCBF] dark:border-[#3D322B] shadow-xl overflow-hidden flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div className="px-4 sm:px-5 py-3 border-b border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
-            <span className="p-1 rounded bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-blue-400">
+            <span className="p-1 rounded bg-[#FFFBEB] dark:bg-[#382A1E] text-[#B77A45] dark:text-[#D79A45] border border-[#D79A45]/30">
               <Target className="w-4 h-4" />
             </span>
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <h2 className="text-sm font-serif font-black text-[#332821] dark:text-[#F2EEE6] tracking-tight">
               Focus Review Session
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded"
+            className="p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] rounded-lg transition-colors touch-target"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -208,43 +203,43 @@ export function FocusReviewModal({
 
         {/* STEP 1: Briefing */}
         {step === "briefing" && (
-          <div className="p-6 flex-1 flex flex-col justify-between">
+          <div className="p-4 sm:p-6 flex-1 flex flex-col justify-between overflow-y-auto">
             <div className="space-y-4">
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-blue-400">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#B77A45] dark:text-[#D79A45]">
                   Calibrated Study Queue
                 </span>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mt-0.5">
-                  You have {targetDurationMinutes} minutes?
+                <h3 className="text-base sm:text-lg font-serif font-black text-[#332821] dark:text-[#F2EEE6] mt-0.5">
+                  Have {targetDurationMinutes} minutes to review?
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-xs text-[#756C64] dark:text-[#9E9186] mt-1">
                   StudyDeck synthesized your review agenda based on due intervals, mistake history, and core curriculum coverage:
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-surface-subtle space-y-3 text-xs">
+              <div className="p-3.5 sm:p-4 rounded-xl border border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] space-y-2.5 text-xs shadow-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600 dark:text-slate-300">Due Spaced Flashcards</span>
-                  <span className="font-semibold text-brand-700 dark:text-blue-400">
+                  <span className="text-[#756C64] dark:text-[#9E9186]">Due Spaced Flashcards</span>
+                  <span className="font-bold text-[#D79A45]">
                     {queue.dueCards.length} cards
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600 dark:text-slate-300">Previous Mistakes to Re-test</span>
-                  <span className="font-semibold text-rose-600 dark:text-rose-400">
+                  <span className="text-[#756C64] dark:text-[#9E9186]">Previous Mistakes to Re-test</span>
+                  <span className="font-bold text-[#B84A39]">
                     {queue.activeMistakes.length} mistakes
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600 dark:text-slate-300">Curriculum Practice Questions</span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                  <span className="text-[#756C64] dark:text-[#9E9186]">Curriculum Practice Questions</span>
+                  <span className="font-bold text-[#332821] dark:text-[#F2EEE6]">
                     {queue.practiceQuestions.length} questions
                   </span>
                 </div>
               </div>
 
               {queue.totalCount === 0 && (
-                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-xs">
+                <div className="p-3 rounded-lg bg-[#FFFBEB] dark:bg-[#382A1E] text-[#B77A45] dark:text-[#D79A45] border border-[#D79A45]/30 text-xs">
                   Your review queue is currently clear! Load sample curriculum or create cards to populate Focus Review.
                 </div>
               )}
@@ -253,7 +248,7 @@ export function FocusReviewModal({
             <button
               onClick={handleStartReview}
               disabled={queue.totalCount === 0}
-              className="mt-4 w-full py-2.5 px-4 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-medium text-xs flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+              className="mt-6 btn-primary w-full py-2.5 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 touch-target"
             >
               <span>Start Focus Review</span>
               <ArrowRight className="w-4 h-4" />
@@ -263,13 +258,13 @@ export function FocusReviewModal({
 
         {/* STEP 2: Running the Focus Session */}
         {step === "running" && (
-          <div className="p-6 flex-1 flex flex-col justify-between">
+          <div className="p-4 sm:p-6 flex-1 flex flex-col justify-between overflow-y-auto">
             {/* Stage: Flashcards */}
             {stage === "flashcards" && queue.dueCards[itemIndex] && (
               <div className="flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="flex justify-between items-center text-xs text-slate-400 mb-2">
-                    <span className="uppercase font-semibold text-brand-700 dark:text-blue-400">
+                  <div className="flex justify-between items-center text-xs text-[#756C64] dark:text-[#9E9186] mb-2 font-bold">
+                    <span className="uppercase text-[#B77A45] dark:text-[#D79A45]">
                       Phase 1: Due Flashcards
                     </span>
                     <span>
@@ -279,17 +274,17 @@ export function FocusReviewModal({
 
                   <div
                     onClick={() => setIsFlipped(!isFlipped)}
-                    className="p-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-subtle min-h-[180px] flex flex-col justify-between cursor-pointer"
+                    className="p-5 sm:p-6 rounded-xl border border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] min-h-[160px] sm:min-h-[180px] flex flex-col justify-between cursor-pointer shadow-xs"
                   >
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">
+                    <span className="text-[10px] text-[#756C64] dark:text-[#9E9186] uppercase font-bold tracking-wider">
                       {isFlipped ? "Definition" : "Term"}
                     </span>
-                    <p className="text-base font-medium text-center my-auto text-slate-900 dark:text-slate-100">
+                    <p className="text-sm sm:text-base font-medium text-center my-auto text-[#332821] dark:text-[#F2EEE6] leading-relaxed">
                       {isFlipped
                         ? queue.dueCards[itemIndex].back
                         : queue.dueCards[itemIndex].front}
                     </p>
-                    <span className="text-[10px] text-slate-400 text-center">
+                    <span className="text-[10px] text-[#756C64] dark:text-[#9E9186] text-center font-bold">
                       Tap to {isFlipped ? "view front" : "reveal answer"}
                     </span>
                   </div>
@@ -300,25 +295,25 @@ export function FocusReviewModal({
                     <div className="grid grid-cols-4 gap-2">
                       <button
                         onClick={() => handleRateFlashcard("again")}
-                        className="py-2 rounded border border-rose-200 bg-rose-50 text-rose-700 text-xs font-bold"
+                        className="py-2.5 rounded-lg border border-[#B84A39]/30 bg-[#FEF2F2] dark:bg-[#450A0A] text-[#B84A39] text-xs font-bold touch-target"
                       >
                         Again
                       </button>
                       <button
                         onClick={() => handleRateFlashcard("hard")}
-                        className="py-2 rounded border border-amber-200 bg-amber-50 text-amber-700 text-xs font-bold"
+                        className="py-2.5 rounded-lg border border-[#D79A45]/30 bg-[#FFFBEB] dark:bg-[#382A1E] text-[#B77A45] dark:text-[#D79A45] text-xs font-bold touch-target"
                       >
                         Hard
                       </button>
                       <button
                         onClick={() => handleRateFlashcard("good")}
-                        className="py-2 rounded border border-blue-200 bg-blue-50 text-brand-700 text-xs font-bold"
+                        className="py-2.5 rounded-lg border border-[#3D6B4F]/30 bg-[#F0FDF4] dark:bg-[#052E16] text-[#3D6B4F] dark:text-[#86EFAC] text-xs font-bold touch-target"
                       >
                         Good
                       </button>
                       <button
                         onClick={() => handleRateFlashcard("easy")}
-                        className="py-2 rounded border border-emerald-200 bg-emerald-50 text-emerald-700 text-xs font-bold"
+                        className="py-2.5 rounded-lg border border-[#3D6B4F] bg-[#F0FDF4] dark:bg-[#052E16] text-[#3D6B4F] dark:text-[#86EFAC] text-xs font-bold touch-target"
                       >
                         Easy
                       </button>
@@ -326,7 +321,7 @@ export function FocusReviewModal({
                   ) : (
                     <button
                       onClick={() => setIsFlipped(true)}
-                      className="w-full py-2.5 rounded-lg bg-brand-700 text-white text-xs font-medium"
+                      className="btn-primary w-full py-2.5 text-xs font-bold uppercase tracking-wider touch-target"
                     >
                       Reveal Answer
                     </button>
@@ -339,60 +334,69 @@ export function FocusReviewModal({
             {stage === "mistakes" && queue.activeMistakes[itemIndex] && (
               <div className="flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="flex justify-between items-center text-xs text-slate-400 mb-2">
-                    <span className="uppercase font-semibold text-rose-600 dark:text-rose-400">
-                      Phase 2: Past Mistake Re-test
+                  <div className="flex justify-between items-center text-xs text-[#756C64] dark:text-[#9E9186] mb-2 font-bold">
+                    <span className="uppercase text-[#B84A39]">
+                      Phase 2: Error Resolution
                     </span>
                     <span>
                       {itemIndex + 1} of {queue.activeMistakes.length}
                     </span>
                   </div>
 
-                  <div className="p-4 rounded-xl border border-rose-100 dark:border-rose-950 bg-rose-50/20 dark:bg-rose-950/10 space-y-2">
-                    <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  <div className="p-4 sm:p-5 rounded-xl border border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] mb-3 shadow-xs">
+                    <span className="text-[10px] text-[#B84A39] uppercase font-bold tracking-wider block mb-1">
+                      Previously Missed Question
+                    </span>
+                    <p className="text-xs sm:text-sm font-semibold text-[#332821] dark:text-[#F2EEE6] leading-snug">
                       {queue.activeMistakes[itemIndex].questionText}
-                    </h4>
-                    <p className="text-xs text-slate-500">
-                      Your prior incorrect answer:{" "}
-                      <span className="text-rose-600 font-medium">
-                        {queue.activeMistakes[itemIndex].lastUserAnswer}
-                      </span>
                     </p>
                   </div>
 
-                  <div className="mt-3">
-                    <label className="text-xs text-slate-500 font-medium block mb-1">
-                      Correct Answer:
-                    </label>
-                    <input
-                      type="text"
-                      value={userSelectedOption}
-                      onChange={(e) => setUserSelectedOption(e.target.value)}
-                      placeholder="Type correct concept..."
-                      className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-surface text-xs focus:outline-none"
-                    />
+                  <div
+                    onClick={() => setIsFlipped(!isFlipped)}
+                    className="p-4 rounded-xl border border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] min-h-[90px] flex flex-col justify-center items-center text-center cursor-pointer shadow-xs"
+                  >
+                    {!isFlipped ? (
+                      <span className="text-xs font-bold text-[#756C64] dark:text-[#9E9186]">
+                        Tap to reveal solution and check recall
+                      </span>
+                    ) : (
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-[#3D6B4F] uppercase font-bold">
+                          Solution:
+                        </span>
+                        <p className="text-sm font-bold text-[#332821] dark:text-[#F2EEE6]">
+                          {queue.activeMistakes[itemIndex].correctAnswer}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex gap-2 mt-4">
-                  <button
-                    onClick={() => handleCheckMistake(false)}
-                    className="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-500"
-                  >
-                    Still Struggling
-                  </button>
-                  <button
-                    onClick={() => {
-                      const isCorrect =
-                        userSelectedOption.trim().toLowerCase() ===
-                        queue.activeMistakes[itemIndex].correctAnswer.trim().toLowerCase();
-                      handleCheckMistake(isCorrect);
-                    }}
-                    disabled={!userSelectedOption.trim()}
-                    className="flex-1 py-2 rounded-lg bg-brand-700 hover:bg-brand-800 disabled:opacity-50 text-white text-xs font-medium"
-                  >
-                    Check &amp; Resolve
-                  </button>
+                <div className="mt-4">
+                  {isFlipped ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleCheckMistake(false)}
+                        className="py-2.5 rounded-lg border border-[#B84A39]/30 bg-[#FEF2F2] dark:bg-[#450A0A] text-[#B84A39] text-xs font-bold touch-target"
+                      >
+                        Still Unclear
+                      </button>
+                      <button
+                        onClick={() => handleCheckMistake(true)}
+                        className="py-2.5 rounded-lg border border-[#3D6B4F] bg-[#F0FDF4] dark:bg-[#052E16] text-[#3D6B4F] dark:text-[#86EFAC] text-xs font-bold touch-target"
+                      >
+                        Resolved!
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setIsFlipped(true)}
+                      className="btn-primary w-full py-2.5 text-xs font-bold uppercase tracking-wider touch-target"
+                    >
+                      Check Understanding
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -401,16 +405,16 @@ export function FocusReviewModal({
             {stage === "questions" && queue.practiceQuestions[itemIndex] && (
               <div className="flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="flex justify-between items-center text-xs text-slate-400 mb-2">
-                    <span className="uppercase font-semibold text-slate-700 dark:text-slate-300">
-                      Phase 3: Core Curriculum Questions
+                  <div className="flex justify-between items-center text-xs text-[#756C64] dark:text-[#9E9186] mb-2 font-bold">
+                    <span className="uppercase text-[#332821] dark:text-[#F2EEE6]">
+                      Phase 3: Curriculum Check
                     </span>
                     <span>
                       {itemIndex + 1} of {queue.practiceQuestions.length}
                     </span>
                   </div>
 
-                  <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">
+                  <h4 className="text-xs sm:text-sm font-serif font-black text-[#332821] dark:text-[#F2EEE6] mb-3 leading-snug">
                     {queue.practiceQuestions[itemIndex].question}
                   </h4>
 
@@ -422,10 +426,10 @@ export function FocusReviewModal({
                           onClick={() => setUserSelectedOption(opt)}
                           disabled={hasCheckedAnswer}
                           className={clsx(
-                            "w-full p-2.5 rounded-lg border text-left text-xs transition-colors",
+                            "w-full p-2.5 sm:p-3 rounded-lg border text-left text-xs transition-colors touch-target",
                             userSelectedOption === opt
-                              ? "border-brand-700 bg-brand-50 dark:bg-brand-950/40 text-brand-900 font-semibold"
-                              : "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                              ? "border-[#D79A45] bg-[#FFFBEB] dark:bg-[#382A1E] text-[#332821] dark:text-[#F2EEE6] font-bold"
+                              : "border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] text-[#332821] dark:text-[#F2EEE6]"
                           )}
                         >
                           {opt}
@@ -438,7 +442,7 @@ export function FocusReviewModal({
                       value={userSelectedOption}
                       onChange={(e) => setUserSelectedOption(e.target.value)}
                       placeholder="Type answer..."
-                      className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-surface text-xs focus:outline-none"
+                      className="w-full p-2.5 rounded-lg border border-[#D6CCBF] dark:border-[#3D322B] bg-[#FFFCF6] dark:bg-[#2B231E] text-[#332821] dark:text-[#F2EEE6] text-xs focus:outline-none focus:border-[#B77A45]"
                     />
                   )}
                 </div>
@@ -448,14 +452,14 @@ export function FocusReviewModal({
                     <button
                       onClick={handleCheckQuestion}
                       disabled={!userSelectedOption.trim()}
-                      className="w-full py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 disabled:opacity-50 text-white text-xs font-medium"
+                      className="btn-primary w-full py-2.5 text-xs font-bold uppercase tracking-wider touch-target"
                     >
                       Check Answer
                     </button>
                   ) : (
                     <button
                       onClick={handleNextQuestion}
-                      className="w-full py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white text-xs font-medium flex items-center justify-center gap-1.5"
+                      className="btn-primary w-full py-2.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 touch-target"
                     >
                       <span>Next Item</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -469,54 +473,54 @@ export function FocusReviewModal({
 
         {/* STEP 3: Summary */}
         {step === "summary" && (
-          <div className="p-6 flex-1 flex flex-col justify-between animate-fade-in text-center">
+          <div className="p-4 sm:p-6 flex-1 flex flex-col justify-between overflow-y-auto animate-fade-in text-center">
             <div className="py-4 space-y-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-full border-2 border-double border-[#D79A45] bg-[#FFFBEB] dark:bg-[#382A1E] text-[#B77A45] dark:text-[#D79A45] flex items-center justify-center mx-auto">
                 <Check className="w-6 h-6" />
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                <h3 className="text-lg font-serif font-black text-[#332821] dark:text-[#F2EEE6]">
                   Focus Review Complete
                 </h3>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-[#756C64] dark:text-[#9E9186] mt-1">
                   You completed your daily curated study sprint.
                 </p>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-left">
-                <div className="p-3 rounded-lg bg-surface-subtle border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                <div className="p-3 rounded-lg bg-[#FFFCF6] dark:bg-[#2B231E] border border-[#D6CCBF] dark:border-[#3D322B]">
+                  <span className="text-[10px] text-[#756C64] dark:text-[#9E9186] uppercase font-bold block">
                     Duration
                   </span>
-                  <span className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  <span className="text-sm sm:text-base font-black text-[#332821] dark:text-[#F2EEE6]">
                     {targetDurationMinutes} min
                   </span>
                 </div>
-                <div className="p-3 rounded-lg bg-surface-subtle border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                <div className="p-3 rounded-lg bg-[#FFFCF6] dark:bg-[#2B231E] border border-[#D6CCBF] dark:border-[#3D322B]">
+                  <span className="text-[10px] text-[#756C64] dark:text-[#9E9186] uppercase font-bold block">
                     Accuracy
                   </span>
-                  <span className="text-base font-bold text-brand-700 dark:text-blue-400">
+                  <span className="text-sm sm:text-base font-black text-[#3D6B4F]">
                     {totalQuestionsTested > 0
                       ? Math.round((correctAnswersCount / totalQuestionsTested) * 100)
                       : 100}
                     %
                   </span>
                 </div>
-                <div className="p-3 rounded-lg bg-surface-subtle border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-                    Mistakes Resolved
+                <div className="p-3 rounded-lg bg-[#FFFCF6] dark:bg-[#2B231E] border border-[#D6CCBF] dark:border-[#3D322B]">
+                  <span className="text-[10px] text-[#756C64] dark:text-[#9E9186] uppercase font-bold block">
+                    Resolved
                   </span>
-                  <span className="text-base font-bold text-emerald-600">
+                  <span className="text-sm sm:text-base font-black text-[#B77A45]">
                     {mistakesResolved}
                   </span>
                 </div>
-                <div className="p-3 rounded-lg bg-surface-subtle border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-                    Cards Improved
+                <div className="p-3 rounded-lg bg-[#FFFCF6] dark:bg-[#2B231E] border border-[#D6CCBF] dark:border-[#3D322B]">
+                  <span className="text-[10px] text-[#756C64] dark:text-[#9E9186] uppercase font-bold block">
+                    Improved
                   </span>
-                  <span className="text-base font-bold text-brand-600">
+                  <span className="text-sm sm:text-base font-black text-[#D79A45]">
                     {cardsImproved}
                   </span>
                 </div>
@@ -525,7 +529,7 @@ export function FocusReviewModal({
 
             <button
               onClick={onClose}
-              className="w-full py-2.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white text-xs font-medium"
+              className="btn-primary w-full py-2.5 text-xs font-bold uppercase tracking-wider touch-target"
             >
               Done
             </button>

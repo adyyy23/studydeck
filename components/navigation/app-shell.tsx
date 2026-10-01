@@ -246,21 +246,39 @@ export function AppShell({ children }: AppShellProps) {
       </aside>
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-8">
+      <div className="flex-1 flex flex-col min-w-0 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
         {/* Mobile Header */}
-        <header className="md:hidden sticky top-0 z-30 bg-[#F7F3EA]/95 dark:bg-[#221B17]/95 backdrop-blur-sm border-b border-[#D6CCBF] dark:border-[#3D322B] px-4 py-2.5 flex items-center justify-between">
-          <Link href="/" className="focus:outline-none">
+        <header className="md:hidden sticky top-0 z-30 bg-[#F7F3EA]/95 dark:bg-[#221B17]/95 backdrop-blur-sm border-b border-[#D6CCBF] dark:border-[#3D322B] px-3 sm:px-4 py-2.5 flex items-center justify-between safe-top">
+          <Link href="/" className="focus:outline-none shrink-0 mr-2">
             <Logo size="sm" showWordmark={true} />
           </Link>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#FFFBEB] dark:bg-[#2B2016] border border-[#D79A45]/30 text-[#B77A45] dark:text-[#D79A45] font-bold text-[10px]">
+          <div className="flex items-center gap-1 sm:gap-1.5 ml-auto">
+            <div className="hidden xs:flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#FFFBEB] dark:bg-[#2B2016] border border-[#D79A45]/30 text-[#B77A45] dark:text-[#D79A45] font-bold text-[10px]">
               <Flame className="w-3 h-3 text-[#D79A45] fill-[#D79A45]" />
               <span>{currentStreak}d</span>
             </div>
-            <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#EAE3D8] dark:bg-[#2E2520] border border-[#D6CCBF] dark:border-[#3D322B] text-[#332821] dark:text-[#F2EEE6] font-bold text-[10px]">
+            <div className="hidden xs:flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#EAE3D8] dark:bg-[#2E2520] border border-[#D6CCBF] dark:border-[#3D322B] text-[#332821] dark:text-[#F2EEE6] font-bold text-[10px]">
               <span>Lv.{levelInfo.level}</span>
             </div>
+
+            {/* Quick Mobile Tools: Milo & Lumi */}
+            <button
+              onClick={() => setPomodoroOpen(true)}
+              className="p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] rounded-md transition-colors"
+              aria-label="Milo Focus Timer"
+              title="Milo's Focus Timer"
+            >
+              <Timer className="w-4 h-4 text-[#B77A45]" strokeWidth={1.75} />
+            </button>
+            <button
+              onClick={() => setAiOpen(true)}
+              className="p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] rounded-md transition-colors"
+              aria-label="Lumi AI Assistant"
+              title="Lumi AI Assistant"
+            >
+              <Sparkles className="w-4 h-4 text-[#6B4E71]" strokeWidth={1.75} />
+            </button>
 
             <button
               onClick={() => setSearchOpen(true)}
@@ -281,7 +299,7 @@ export function AppShell({ children }: AppShellProps) {
             </button>
             <button
               onClick={() => setProfileOpen(true)}
-              className="focus:outline-none"
+              className="focus:outline-none shrink-0"
               aria-label="User Profile"
             >
               <AnimalAvatar
@@ -294,13 +312,13 @@ export function AppShell({ children }: AppShellProps) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 md:px-8 py-5 md:py-8">
+        <main className="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 md:px-8 py-4 sm:py-5 md:py-8">
           {children}
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#F7F3EA]/95 dark:bg-[#221B17]/95 backdrop-blur-md border-t border-[#D6CCBF] dark:border-[#3D322B] px-2 py-1 flex items-center justify-around select-none">
+      {/* Mobile Bottom Navigation Bar with Safe Area Inset */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#F7F3EA]/95 dark:bg-[#221B17]/95 backdrop-blur-md border-t border-[#D6CCBF] dark:border-[#3D322B] px-1 sm:px-2 pt-1 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex items-center justify-around select-none">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
@@ -311,7 +329,7 @@ export function AppShell({ children }: AppShellProps) {
               key={item.href}
               href={item.href}
               className={clsx(
-                "flex flex-col items-center justify-center flex-1 py-1.5 transition-all text-center",
+                "flex flex-col items-center justify-center flex-1 py-1 transition-all text-center touch-target",
                 isActive
                   ? "text-[#654A3A] dark:text-[#D79A45] font-bold"
                   : "text-[#756C64] dark:text-[#9E9186] hover:text-[#332821] dark:hover:text-[#F2EEE6]"
