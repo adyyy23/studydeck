@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="10" fill="#0F172A"/>
+  <!-- Base Foundation Stratum -->
+  <path d="M24 42L8 33.5L16 28.5L24 33L32 28.5L40 33.5L24 42Z" fill="#1E40AF"/>
+  <!-- Mid Ascending Repetition Plane -->
+  <path d="M24 30L10 22.5L18 17.5L24 21L30 17.5L38 22.5L24 30Z" fill="#3B82F6"/>
+  <!-- Apex Focus & Knowledge Cap -->
+  <path d="M24 18L12 11.5L24 5L36 11.5L24 18Z" fill="#93C5FD"/>
+  <!-- Central Alignment Node -->
+  <circle cx="24" cy="11.5" r="2.2" fill="#0F172A"/>
+</svg>

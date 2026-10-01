@@ -1,0 +1,17 @@
+{
+  "short_name": "StudyDeck",
+  "name": "StudyDeck — Study Smarter. Together.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "48x48 72x72 96x96 128x128 256x256 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#F9FAFB",
+  "theme_color": "#1E3A8A",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/"
+}

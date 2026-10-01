@@ -1,0 +1,789 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* === DEFAULT: StudyDeck Light === */
+  :root {
+    --background: #F9FAFB;
+    --foreground: #111827;
+    --surface: #FFFFFF;
+    --surface-muted: #F3F4F6;
+    --surface-subtle: #F9FAFB;
+    --border: #E5E7EB;
+    --accent: #1E3A8A;
+    --accent-light: #DBEAFE;
+    --accent-muted: #93C5FD;
+    --accent-text: #1E3A8A;
+    --muted-text: #6B7280;
+    --progress-bar: #1E3A8A;
+    --selection: #DBEAFE;
+  }
+
+  /* === StudyDeck Dark === */
+  .dark {
+    --background: #0B0F17;
+    --foreground: #F3F4F6;
+    --surface: #111827;
+    --surface-muted: #1F2937;
+    --surface-subtle: #161F30;
+    --border: #1F2937;
+    --accent: #60A5FA;
+    --accent-light: #1E3A5F;
+    --accent-muted: #1E40AF;
+    --accent-text: #93C5FD;
+    --muted-text: #9CA3AF;
+    --progress-bar: #3B82F6;
+    --selection: #1E3A5F;
+  }
+
+  /* === Midnight Light === */
+  .theme-midnight {
+    --background: #F0F2F8;
+    --foreground: #0F172A;
+    --surface: #FFFFFF;
+    --surface-muted: #EEF0F8;
+    --surface-subtle: #F0F2F8;
+    --border: #E2E8F0;
+    --accent: #1B2A4A;
+    --accent-light: #E0E7FF;
+    --accent-muted: #A5B4FC;
+    --accent-text: #1B2A4A;
+    --muted-text: #64748B;
+    --progress-bar: #1B2A4A;
+    --selection: #E0E7FF;
+  }
+  .theme-midnight.dark {
+    --background: #07090F;
+    --foreground: #E2E8F0;
+    --surface: #0F1219;
+    --surface-muted: #161C2A;
+    --surface-subtle: #0F1219;
+    --border: #1E2A3A;
+    --accent: #818CF8;
+    --accent-light: #1E1B3A;
+    --accent-muted: #3730A3;
+    --accent-text: #A5B4FC;
+    --muted-text: #94A3B8;
+    --progress-bar: #6366F1;
+    --selection: #1E1B3A;
+  }
+
+  /* === Forest Light === */
+  .theme-forest {
+    --background: #F7F9F7;
+    --foreground: #14291F;
+    --surface: #FFFFFF;
+    --surface-muted: #F0F4F0;
+    --surface-subtle: #F7F9F7;
+    --border: #D1E8D5;
+    --accent: #166534;
+    --accent-light: #DCFCE7;
+    --accent-muted: #86EFAC;
+    --accent-text: #166534;
+    --muted-text: #4B7A5A;
+    --progress-bar: #16A34A;
+    --selection: #DCFCE7;
+  }
+  .theme-forest.dark {
+    --background: #080E0A;
+    --foreground: #ECFDF5;
+    --surface: #0E1A11;
+    --surface-muted: #162119;
+    --surface-subtle: #0E1A11;
+    --border: #1A2E1E;
+    --accent: #4ADE80;
+    --accent-light: #052E16;
+    --accent-muted: #166534;
+    --accent-text: #86EFAC;
+    --muted-text: #6EE7B7;
+    --progress-bar: #22C55E;
+    --selection: #052E16;
+  }
+
+  /* === Sakura Light === */
+  .theme-sakura {
+    --background: #FDF7F9;
+    --foreground: #1F1217;
+    --surface: #FFFFFF;
+    --surface-muted: #FDF2F8;
+    --surface-subtle: #FDF7F9;
+    --border: #F3C5D5;
+    --accent: #9D174D;
+    --accent-light: #FCE7F3;
+    --accent-muted: #F9A8D4;
+    --accent-text: #9D174D;
+    --muted-text: #9D4E68;
+    --progress-bar: #DB2777;
+    --selection: #FCE7F3;
+  }
+  .theme-sakura.dark {
+    --background: #0F080B;
+    --foreground: #FDF2F8;
+    --surface: #1A0F13;
+    --surface-muted: #241319;
+    --surface-subtle: #1A0F13;
+    --border: #3A1622;
+    --accent: #F472B6;
+    --accent-light: #4A0E2C;
+    --accent-muted: #9D174D;
+    --accent-text: #FBCFE8;
+    --muted-text: #F9A8D4;
+    --progress-bar: #EC4899;
+    --selection: #4A0E2C;
+  }
+
+  /* === Ocean Light === */
+  .theme-ocean {
+    --background: #F5FAFB;
+    --foreground: #0C1E24;
+    --surface: #FFFFFF;
+    --surface-muted: #ECFAFA;
+    --surface-subtle: #F5FAFB;
+    --border: #B3E5EC;
+    --accent: #0E7490;
+    --accent-light: #CFFAFE;
+    --accent-muted: #67E8F9;
+    --accent-text: #0E7490;
+    --muted-text: #2E7A8A;
+    --progress-bar: #0891B2;
+    --selection: #CFFAFE;
+  }
+  .theme-ocean.dark {
+    --background: #050C10;
+    --foreground: #ECFEFF;
+    --surface: #0A1520;
+    --surface-muted: #0F1F2C;
+    --surface-subtle: #0A1520;
+    --border: #0E2938;
+    --accent: #22D3EE;
+    --accent-light: #0A2432;
+    --accent-muted: #0E7490;
+    --accent-text: #A5F3FC;
+    --muted-text: #67E8F9;
+    --progress-bar: #06B6D4;
+    --selection: #0A2432;
+  }
+
+  /* === Lavender Light === */
+  .theme-lavender {
+    --background: #F8F7FF;
+    --foreground: #1A1030;
+    --surface: #FFFFFF;
+    --surface-muted: #F3F0FF;
+    --surface-subtle: #F8F7FF;
+    --border: #DDD6FE;
+    --accent: #6D28D9;
+    --accent-light: #EDE9FE;
+    --accent-muted: #C4B5FD;
+    --accent-text: #5B21B6;
+    --muted-text: #7C5CA8;
+    --progress-bar: #7C3AED;
+    --selection: #EDE9FE;
+  }
+  .theme-lavender.dark {
+    --background: #0A070F;
+    --foreground: #F5F3FF;
+    --surface: #130D20;
+    --surface-muted: #1C142E;
+    --surface-subtle: #130D20;
+    --border: #2D1B69;
+    --accent: #A78BFA;
+    --accent-light: #2D1B69;
+    --accent-muted: #5B21B6;
+    --accent-text: #C4B5FD;
+    --muted-text: #C4B5FD;
+    --progress-bar: #8B5CF6;
+    --selection: #2D1B69;
+  }
+
+  /* === Latte Light === */
+  .theme-latte {
+    --background: #FDFAF6;
+    --foreground: #1C1007;
+    --surface: #FFFBF5;
+    --surface-muted: #FEF3E2;
+    --surface-subtle: #FDFAF6;
+    --border: #E8D5B7;
+    --accent: #78350F;
+    --accent-light: #FEF3C7;
+    --accent-muted: #FCD34D;
+    --accent-text: #78350F;
+    --muted-text: #92400E;
+    --progress-bar: #D97706;
+    --selection: #FEF3C7;
+  }
+  .theme-latte.dark {
+    --background: #100A02;
+    --foreground: #FFFBF0;
+    --surface: #1C1208;
+    --surface-muted: #261A0E;
+    --surface-subtle: #1C1208;
+    --border: #3D2A10;
+    --accent: #FBBF24;
+    --accent-light: #3D1F00;
+    --accent-muted: #92400E;
+    --accent-text: #FDE68A;
+    --muted-text: #FCD34D;
+    --progress-bar: #F59E0B;
+    --selection: #3D1F00;
+  }
+
+  /* === Mono Light === */
+  .theme-mono {
+    --background: #F9FAFB;
+    --foreground: #111827;
+    --surface: #FFFFFF;
+    --surface-muted: #F3F4F6;
+    --surface-subtle: #F9FAFB;
+    --border: #E5E7EB;
+    --accent: #1F2937;
+    --accent-light: #F3F4F6;
+    --accent-muted: #9CA3AF;
+    --accent-text: #111827;
+    --muted-text: #6B7280;
+    --progress-bar: #374151;
+    --selection: #E5E7EB;
+  }
+  .theme-mono.dark {
+    --background: #080A0C;
+    --foreground: #F9FAFB;
+    --surface: #111318;
+    --surface-muted: #1A1D22;
+    --surface-subtle: #111318;
+    --border: #1F2937;
+    --accent: #D1D5DB;
+    --accent-light: #1F2937;
+    --accent-muted: #374151;
+    --accent-text: #F9FAFB;
+    --muted-text: #9CA3AF;
+    --progress-bar: #6B7280;
+    --selection: #1F2937;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.4);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.6);
+}
+
+/* ============ Flashcard 3D flip ============ */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* ============ Card flip for Memory Match ============ */
+.memory-card {
+  perspective: 600px;
+}
+.memory-card-inner {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.memory-card-inner.flipped {
+  transform: rotateY(180deg);
+}
+.memory-card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+.memory-card-back-face {
+  transform: rotateY(180deg);
+}
+
+/* ============ Animations ============ */
+@keyframes bounce-in {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  80% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+.bounce-in {
+  animation: bounce-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.shake {
+  animation: shake 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up 0.3s ease both;
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(1); opacity: 0.8; }
+  50%  { transform: scale(1.15); opacity: 0.3; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+.pulse-ring {
+  animation: pulse-ring 1.5s ease-in-out infinite;
+}
+
+/* ============ Timer ring SVG ============ */
+.timer-ring-track {
+  stroke: var(--border);
+  stroke-width: 6;
+  fill: none;
+}
+.timer-ring-progress {
+  stroke: var(--accent);
+  stroke-width: 6;
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+  transform-origin: center;
+  transform: rotate(-90deg);
+}
+
+/* ============ Game path ============ */
+.adventure-node {
+  transition: all 0.3s ease;
+}
+.adventure-node.active {
+  filter: drop-shadow(0 0 8px var(--accent));
+}
+
+/* ============ Consumer Tactile System ============ */
+.btn-tactile {
+  border-bottom-width: 4px;
+  transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+.btn-tactile:active {
+  border-bottom-width: 0px !important;
+  transform: translateY(4px);
+}
+
+.btn-tactile-accent {
+  background-color: var(--accent);
+  color: #ffffff;
+  border-color: rgba(0, 0, 0, 0.3);
+  border-bottom-width: 4px;
+  transition: all 0.08s ease;
+}
+.btn-tactile-accent:hover {
+  filter: brightness(1.05);
+}
+.btn-tactile-accent:active {
+  border-bottom-width: 0px !important;
+  transform: translateY(4px);
+}
+
+.btn-tactile-surface {
+  background-color: var(--surface);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-bottom: 4px solid var(--border);
+  transition: all 0.08s ease;
+}
+.btn-tactile-surface:hover {
+  background-color: var(--surface-muted);
+}
+.btn-tactile-surface:active {
+  border-bottom-width: 1px !important;
+  transform: translateY(3px);
+}
+
+.card-tactile {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: 4px solid var(--border);
+  border-radius: 1rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.card-tactile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+}
+
+/* Character speech bubble animation */
+@keyframes bubble-pop {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.bubble-pop {
+  animation: bubble-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ============ XP / Progress Bars ============ */
+.xp-bar-track {
+  height: 8px;
+  background: var(--surface-muted);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.xp-bar-fill {
+  height: 100%;
+  background: #F59E0B;
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.xp-bar-fill.blue {
+  background: var(--accent);
+}
+.xp-bar-fill.green {
+  background: #10B981;
+}
+.xp-bar-fill.red {
+  background: #EF4444;
+}
+
+/* ============ Level Badge ============ */
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1.5px solid currentColor;
+}
+
+/* ============ Quest Item ============ */
+.quest-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  transition: all 0.15s ease;
+}
+.quest-item.completed {
+  border-color: #10B981;
+  background: #F0FDF4;
+  opacity: 0.8;
+}
+.quest-item.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.dark .quest-item.completed {
+  background: #052E16;
+}
+.dark .quest-item.active {
+  background: var(--accent-muted);
+}
+
+/* ============ Achievement Badge ============ */
+.achievement-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  position: relative;
+  transition: transform 0.15s ease;
+}
+.achievement-badge.unlocked {
+  border-color: #F59E0B;
+  background: #FFFBEB;
+}
+.achievement-badge.unlocked:hover {
+  transform: translateY(-2px);
+}
+.dark .achievement-badge.unlocked {
+  background: #1C1207;
+  border-color: #D97706;
+}
+
+/* ============ Mastery Ring ============ */
+.mastery-ring-svg {
+  transform: rotate(-90deg);
+}
+.mastery-ring-track {
+  fill: none;
+  stroke: var(--border);
+}
+.mastery-ring-fill {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============ Streak Dots ============ */
+.streak-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  border: 2px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--muted-text);
+}
+.streak-dot.active {
+  background: #F59E0B;
+  border-color: #D97706;
+  color: #ffffff;
+}
+.streak-dot.today {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent-text);
+}
+
+/* ============ Game HUD ============ */
+.game-hud {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.game-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.game-stat-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--foreground);
+  line-height: 1;
+}
+.game-stat-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-text);
+}
+
+/* ============ XP Float Animation ============ */
+@keyframes xp-float {
+  0% { opacity: 0; transform: translateY(0px) scale(0.8); }
+  20% { opacity: 1; transform: translateY(-8px) scale(1); }
+  80% { opacity: 1; transform: translateY(-20px) scale(1); }
+  100% { opacity: 0; transform: translateY(-32px) scale(0.9); }
+}
+.xp-float {
+  animation: xp-float 1.2s ease-out forwards;
+  pointer-events: none;
+  position: absolute;
+  font-size: 11px;
+  font-weight: 800;
+  color: #F59E0B;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  z-index: 50;
+}
+
+/* ============ Correct/Wrong Flash ============ */
+@keyframes correct-flash {
+  0% { background-color: transparent; }
+  30% { background-color: #D1FAE5; }
+  100% { background-color: transparent; }
+}
+@keyframes wrong-flash {
+  0% { background-color: transparent; }
+  30% { background-color: #FEE2E2; }
+  100% { background-color: transparent; }
+}
+.correct-flash { animation: correct-flash 0.5s ease both; }
+.wrong-flash { animation: wrong-flash 0.5s ease both; }
+.dark .correct-flash { animation: none; background-color: #052E16; }
+.dark .wrong-flash { animation: none; background-color: #450A0A; }
+
+/* ============ Number Count Up ============ */
+@keyframes count-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.count-pop {
+  animation: count-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ============ Patterned background (subtle dot grid) ============ */
+.dot-grid-bg {
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* ============ Knowledge Path ============ */
+.knowledge-path-node {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+.knowledge-path-node.completed {
+  background: #10B981;
+  border-color: #059669;
+  color: #ffffff;
+}
+.knowledge-path-node.current {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 0 0 4px var(--accent-light);
+}
+.knowledge-path-node.locked {
+  background: var(--surface-muted);
+  color: var(--muted-text);
+}
+.knowledge-path-connector {
+  width: 3px;
+  flex: 1;
+  min-height: 24px;
+  background: var(--border);
+  margin: 0 auto;
+}
+.knowledge-path-connector.completed {
+  background: #10B981;
+}
+
+/* ============ Subject Card (Academic Progression) ============ */
+.subject-card {
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+.subject-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  border-radius: 0 0 0 10px;
+}
+.subject-card.active::before {
+  width: 4px;
+}
+.subject-card:hover {
+  border-color: var(--accent);
+}
+.subject-card.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+/* ============ Study Tab ============ */
+.study-tab {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1.5px solid transparent;
+  transition: all 0.12s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.study-tab.active {
+  border-color: var(--accent);
+  color: var(--accent-text);
+  background: var(--accent-light);
+}
+.study-tab:not(.active) {
+  color: var(--muted-text);
+}
+.study-tab:not(.active):hover {
+  background: var(--surface-muted);
+  color: var(--foreground);
+}
+
+/* ============ Reward Toast ============ */
+@keyframes reward-slide-in {
+  from { transform: translateX(calc(100% + 16px)); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes reward-slide-out {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(calc(100% + 16px)); opacity: 0; }
+}
+.reward-toast {
+  animation: reward-slide-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.reward-toast.out {
+  animation: reward-slide-out 0.25s ease both;
+}
+
+/* ============ Combo Banner ============ */
+@keyframes combo-pop {
+  0% { transform: scale(0.6) rotate(-5deg); opacity: 0; }
+  60% { transform: scale(1.15) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.combo-pop {
+  animation: combo-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+
