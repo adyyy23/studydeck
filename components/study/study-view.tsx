@@ -133,23 +133,23 @@ export function StudyView() {
   };
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-7rem)] md:flex-row md:h-[calc(100vh-4rem)] md:overflow-hidden bg-[#F2EEE6] font-sans text-[#332821] -m-3 sm:-m-6 md:-m-8">
+    <div className="flex flex-col h-full md:flex-row md:overflow-hidden bg-background font-sans text-foreground">
       {/* Mobile Course Switcher Bar (< md) */}
-      <div className="md:hidden bg-[#FFFCF6] border-b border-[#D6CCBF] p-3 flex flex-col gap-2 z-20">
+      <div className="md:hidden bg-[#FFFCF6] dark:bg-[#211A16] border-b border-[#D6CCBF] dark:border-[#44372E] p-3 flex flex-col gap-2 z-20">
         <div className="flex items-center justify-between gap-2">
           <button
             onClick={() => setMobileCoursePickerOpen(!mobileCoursePickerOpen)}
-            className="flex-1 flex items-center justify-between px-3 py-2 bg-[#F7F3EA] border border-[#D6CCBF] rounded-lg text-xs font-bold text-[#332821] touch-target"
+            className="flex-1 flex items-center justify-between px-3 py-2 bg-[#F7F3EA] dark:bg-[#29211C] border border-[#D6CCBF] dark:border-[#44372E] rounded-lg text-xs font-bold text-[#332821] dark:text-[#F2EADF] touch-target"
           >
             <div className="flex items-center gap-2 truncate">
-              <BookOpen className="w-4 h-4 text-[#B77A45] shrink-0" />
+              <BookOpen className="w-4 h-4 text-[#B77A45] dark:text-[#D09A68] shrink-0" />
               <span className="truncate">{activeSubject ? `${activeSubject.code}: ${activeSubject.name}` : "Select Course..."}</span>
             </div>
-            <ChevronDown className={clsx("w-4 h-4 text-[#756C64] shrink-0 transition-transform", mobileCoursePickerOpen && "rotate-180")} />
+            <ChevronDown className={clsx("w-4 h-4 text-[#756C64] dark:text-[#B9ADA1] shrink-0 transition-transform", mobileCoursePickerOpen && "rotate-180")} />
           </button>
           <button
             onClick={() => setCreateSubjectOpen(true)}
-            className="px-2.5 py-2 bg-[#49372D] text-[#F7F3EA] rounded-lg text-xs font-bold flex items-center gap-1 shrink-0 touch-target"
+            className="px-2.5 py-2 bg-[#49372D] dark:bg-[#C28A5C] text-[#F7F3EA] dark:text-[#171310] rounded-lg text-xs font-bold flex items-center gap-1 shrink-0 touch-target"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>New</span>
@@ -158,7 +158,7 @@ export function StudyView() {
 
         {/* Mobile Course Dropdown Sheet */}
         {mobileCoursePickerOpen && (
-          <div className="mt-1 p-2 bg-[#FFFCF6] border border-[#D6CCBF] rounded-lg shadow-md max-h-60 overflow-y-auto space-y-1 animate-fade-in">
+          <div className="mt-1 p-2 bg-[#FFFCF6] dark:bg-[#211A16] border border-[#D6CCBF] dark:border-[#44372E] rounded-lg shadow-md max-h-60 overflow-y-auto space-y-1 animate-fade-in">
             {filteredSubjects.map((sub) => {
               const isSelected = sub.id === selectedSubjectId;
               return (
@@ -170,14 +170,16 @@ export function StudyView() {
                   }}
                   className={clsx(
                     "w-full text-left p-2.5 rounded-md text-xs transition-colors flex items-center justify-between touch-target",
-                    isSelected ? "bg-[#B77A45]/15 font-bold text-[#B77A45]" : "hover:bg-[#F2EEE6] text-[#332821]"
+                    isSelected
+                      ? "bg-[#B77A45]/15 dark:bg-[#D09A68]/20 font-bold text-[#B77A45] dark:text-[#D09A68]"
+                      : "hover:bg-[#F2EEE6] dark:hover:bg-[#29211C] text-[#332821] dark:text-[#F2EADF]"
                   )}
                 >
                   <div className="truncate">
                     <span className="font-mono font-bold mr-2">{sub.code}</span>
-                    <span className="text-[#756C64]">{sub.name}</span>
+                    <span className="text-[#756C64] dark:text-[#B9ADA1]">{sub.name}</span>
                   </div>
-                  {isSelected && <span className="text-[10px] font-black uppercase text-[#B77A45]">Active</span>}
+                  {isSelected && <span className="text-[10px] font-black uppercase text-[#B77A45] dark:text-[#D09A68]">Active</span>}
                 </button>
               );
             })}
@@ -186,25 +188,25 @@ export function StudyView() {
       </div>
 
       {/* Desktop Left Panel: Course Index / Subjects */}
-      <div className="hidden md:flex md:w-72 lg:w-80 border-r border-[#D6CCBF] bg-[#F7F3EA] flex-col shrink-0 z-10 shadow-[2px_0_10px_rgba(0,0,0,0.02)]">
-        <div className="p-4 lg:p-5 border-b border-[#D6CCBF]">
+      <div className="hidden md:flex md:w-72 lg:w-80 border-r border-[#D6CCBF] dark:border-[#44372E] bg-[#F7F3EA] dark:bg-[#171310] flex-col shrink-0 z-10 shadow-[2px_0_10px_rgba(0,0,0,0.02)]">
+        <div className="p-4 lg:p-5 border-b border-[#D6CCBF] dark:border-[#44372E]">
           <div className="flex items-center justify-between mb-3 lg:mb-4">
-            <h2 className="text-[11px] font-bold text-[#756C64] uppercase tracking-widest">My Courses</h2>
+            <h2 className="text-[11px] font-bold text-[#756C64] dark:text-[#B9ADA1] uppercase tracking-widest">My Courses</h2>
             <button
               onClick={() => setCreateSubjectOpen(true)}
-              className="px-2 py-1 flex items-center gap-1 text-[11px] font-bold text-[#B77A45] hover:bg-[#F2EEE6] rounded transition-colors touch-target"
+              className="px-2 py-1 flex items-center gap-1 text-[11px] font-bold text-[#B77A45] dark:text-[#D09A68] hover:bg-[#F2EEE6] dark:hover:bg-[#29211C] rounded transition-colors touch-target"
             >
               <Plus className="w-3 h-3" /> New Subject
             </button>
           </div>
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#756C64]" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#756C64] dark:text-[#B9ADA1]" />
             <input
               type="text"
               placeholder="Search index..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-[#FFFCF6] border border-[#D6CCBF] rounded-md text-sm focus:outline-none focus:border-[#B77A45] focus:ring-1 focus:ring-[#B77A45] transition-shadow placeholder-[#756C64]/60"
+              className="w-full pl-9 pr-3 py-2 bg-[#FFFCF6] dark:bg-[#211A16] border border-[#D6CCBF] dark:border-[#44372E] text-[#332821] dark:text-[#F2EADF] rounded-md text-sm focus:outline-none focus:border-[#B77A45] dark:focus:border-[#D09A68] focus:ring-1 focus:ring-[#B77A45] transition-shadow placeholder-[#756C64]/60 dark:placeholder-[#B9ADA1]/60"
             />
           </div>
         </div>
@@ -227,30 +229,30 @@ export function StudyView() {
                 className={clsx(
                   "w-full text-left p-3 rounded-lg border transition-all duration-200 flex flex-col gap-1 touch-target",
                   isSelected
-                    ? "bg-[#FFFCF6] border-[#D6CCBF] shadow-xs border-l-4 border-l-[#B77A45]"
-                    : "bg-transparent border-transparent hover:bg-[#F2EEE6] hover:border-[#D6CCBF]"
+                    ? "bg-[#FFFCF6] dark:bg-[#211A16] border-[#D6CCBF] dark:border-[#44372E] shadow-xs border-l-4 border-l-[#B77A45] dark:border-l-[#D09A68]"
+                    : "bg-transparent border-transparent hover:bg-[#F2EEE6] dark:hover:bg-[#29211C] hover:border-[#D6CCBF] dark:hover:border-[#44372E]"
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className={clsx("font-bold font-serif tracking-tight", isSelected ? "text-[#332821]" : "text-[#49372D]")}>
+                  <span className={clsx("font-bold font-serif tracking-tight", isSelected ? "text-[#332821] dark:text-[#F2EADF]" : "text-[#49372D] dark:text-[#F2EADF]/80")}>
                     {subject.code}
                   </span>
                   {stats.dueCards > 0 && (
                     <span className="w-2 h-2 rounded-full bg-[#D79A45]" title={`${stats.dueCards} due`} />
                   )}
                 </div>
-                <span className={clsx("text-[11px] truncate block", isSelected ? "text-[#49372D]" : "text-[#756C64]")}>
+                <span className={clsx("text-[11px] truncate block", isSelected ? "text-[#49372D] dark:text-[#F2EADF]" : "text-[#756C64] dark:text-[#B9ADA1]")}>
                   {subject.name}
                 </span>
                 <div className="mt-1 flex items-center gap-2">
-                  <div className="flex-1 h-1 bg-[#D6CCBF] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#B77A45]" style={{ width: `${stats.masteryPercentage}%` }} />
+                  <div className="flex-1 h-1 bg-[#D6CCBF] dark:bg-[#44372E] rounded-full overflow-hidden">
+                    <div className="h-full bg-[#B77A45] dark:bg-[#D09A68]" style={{ width: `${stats.masteryPercentage}%` }} />
                   </div>
-                  <span className={clsx("text-[10px] font-bold", isSelected ? "text-[#B77A45]" : "text-[#756C64]")}>
+                  <span className={clsx("text-[10px] font-bold", isSelected ? "text-[#B77A45] dark:text-[#D09A68]" : "text-[#756C64] dark:text-[#B9ADA1]")}>
                     {stats.masteryPercentage}%
                   </span>
                 </div>
-                <span className="text-[10px] text-[#756C64] mt-0.5">
+                <span className="text-[10px] text-[#756C64] dark:text-[#B9ADA1] mt-0.5">
                   {stats.dueCards} due • {stats.totalCards} cards
                 </span>
               </button>
@@ -260,28 +262,28 @@ export function StudyView() {
       </div>
 
       {/* Right Area: Course Field Journal */}
-      <div className="flex-1 flex flex-col bg-[#F2EEE6] overflow-y-auto md:overflow-hidden relative">
+      <div className="flex-1 flex flex-col bg-background dark:bg-[#171310] overflow-y-auto md:overflow-hidden relative">
         {/* Background Texture Pattern */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#332821 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
         
         {!activeSubject ? (
           <div className="flex-1 flex items-center justify-center p-6 text-center relative z-10">
             <div className="max-w-sm space-y-4">
-              <BookOpen className="w-16 h-16 text-[#D6CCBF] mx-auto" />
-              <h2 className="text-xl font-serif font-bold text-[#49372D]">Academic Field Journal</h2>
-              <p className="text-sm text-[#756C64]">Select a course from the index to view your notes and training materials.</p>
+              <BookOpen className="w-16 h-16 text-[#D6CCBF] dark:text-[#44372E] mx-auto" />
+              <h2 className="text-xl font-serif font-bold text-[#49372D] dark:text-[#F2EADF]">Academic Field Journal</h2>
+              <p className="text-sm text-[#756C64] dark:text-[#B9ADA1]">Select a course from the index to view your notes and training materials.</p>
             </div>
           </div>
         ) : (
           <div className="flex-1 flex flex-col md:overflow-hidden relative z-10">
             {/* Course Header */}
-            <div className="px-4 sm:px-6 lg:px-8 pt-5 sm:pt-7 pb-4 sm:pb-6 bg-[#FFFCF6] border-b border-[#D6CCBF] shadow-xs">
+            <div className="px-4 sm:px-6 lg:px-8 pt-5 sm:pt-7 pb-4 sm:pb-6 bg-[#FFFCF6] dark:bg-[#211A16] border-b border-[#D6CCBF] dark:border-[#44372E] shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-[#332821] tracking-tight mb-1 sm:mb-2">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-[#332821] dark:text-[#F2EADF] tracking-tight mb-1 sm:mb-2">
                     {activeSubject.code}: {activeSubject.name}
                   </h1>
-                  <div className="flex items-center gap-3 text-xs font-bold text-[#756C64] uppercase tracking-widest">
+                  <div className="flex items-center gap-3 text-xs font-bold text-[#756C64] dark:text-[#B9ADA1] uppercase tracking-widest">
                     <span>Active Semester</span>
                     <span>•</span>
                     <span>{subjectModules.length} Modules</span>
@@ -290,21 +292,21 @@ export function StudyView() {
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <button
                     onClick={() => setActiveStudyCards(subjectCards.filter(c => c.state === 'new' || c.nextReviewDate <= new Date().toISOString().split("T")[0]))}
-                    className="px-3.5 py-2 bg-[#49372D] hover:bg-[#332821] text-[#F7F3EA] text-xs sm:text-sm font-bold rounded flex items-center gap-1.5 transition-colors shadow-xs touch-target"
+                    className="px-3.5 py-2 bg-[#49372D] dark:bg-[#C28A5C] hover:bg-[#332821] dark:hover:bg-[#D39B6B] text-[#F7F3EA] dark:text-[#171310] text-xs sm:text-sm font-bold rounded-lg flex items-center gap-1.5 transition-colors shadow-xs touch-target"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" /> Study Deck
                   </button>
                   <button
                     onClick={() => setMaterialUploadOpen(true)}
-                    className="px-3.5 py-2 bg-[#FFFCF6] hover:bg-[#F2EEE6] text-[#49372D] border border-[#D6CCBF] text-xs sm:text-sm font-bold rounded flex items-center gap-1.5 transition-colors touch-target"
+                    className="px-3.5 py-2 bg-[#FFFCF6] dark:bg-[#29211C] hover:bg-[#F2EEE6] dark:hover:bg-[#332820] text-[#49372D] dark:text-[#F2EADF] border border-[#D6CCBF] dark:border-[#44372E] text-xs sm:text-sm font-bold rounded-lg flex items-center gap-1.5 transition-colors touch-target"
                   >
                     <Plus className="w-3.5 h-3.5" /> Add Material
                   </button>
                   <button
                     onClick={() => setAiContextDrawerOpen(true)}
-                    className="px-3.5 py-2 bg-[#FFFCF6] hover:bg-[#F2EEE6] text-[#49372D] border border-[#D6CCBF] text-xs sm:text-sm font-bold rounded flex items-center gap-1.5 transition-colors touch-target"
+                    className="px-3.5 py-2 bg-[#FFFCF6] dark:bg-[#29211C] hover:bg-[#F2EEE6] dark:hover:bg-[#332820] text-[#49372D] dark:text-[#F2EADF] border border-[#D6CCBF] dark:border-[#44372E] text-xs sm:text-sm font-bold rounded-lg flex items-center gap-1.5 transition-colors touch-target"
                   >
-                    <MessageSquare className="w-3.5 h-3.5 text-[#6B4E71]" /> Ask Lumi
+                    <MessageSquare className="w-3.5 h-3.5 text-[#6B4E71] dark:text-[#A78BFA]" /> Ask Lumi
                   </button>
                 </div>
               </div>
@@ -313,22 +315,22 @@ export function StudyView() {
                 <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
                   <div className="flex-1">
                     <div className="flex items-end justify-between mb-1.5">
-                      <span className="text-xs sm:text-sm font-bold text-[#49372D] uppercase tracking-wider">{masteryStats.masteryPercentage}% Mastery</span>
-                      <span className="text-[11px] sm:text-xs text-[#756C64] font-medium">Next Milestone: {Math.min(100, Math.ceil((masteryStats.masteryPercentage + 1) / 25) * 25)}%</span>
+                      <span className="text-xs sm:text-sm font-bold text-[#49372D] dark:text-[#F2EADF] uppercase tracking-wider">{masteryStats.masteryPercentage}% Mastery</span>
+                      <span className="text-[11px] sm:text-xs text-[#756C64] dark:text-[#B9ADA1] font-medium">Next Milestone: {Math.min(100, Math.ceil((masteryStats.masteryPercentage + 1) / 25) * 25)}%</span>
                     </div>
-                    <div className="h-2 w-full bg-[#F2EEE6] rounded-full overflow-hidden border border-[#D6CCBF]">
-                      <div className="h-full bg-[#B77A45]" style={{ width: `${masteryStats.masteryPercentage}%` }} />
+                    <div className="h-2 w-full bg-[#F2EEE6] dark:bg-[#29211C] rounded-full overflow-hidden border border-[#D6CCBF] dark:border-[#44372E]">
+                      <div className="h-full bg-[#B77A45] dark:bg-[#D09A68]" style={{ width: `${masteryStats.masteryPercentage}%` }} />
                     </div>
                   </div>
                   <div className="flex gap-4 shrink-0">
                     <div className="text-left sm:text-right">
-                      <span className="block text-xl sm:text-2xl font-serif font-bold text-[#332821] leading-none">{masteryStats.dueCards}</span>
-                      <span className="text-[10px] font-bold text-[#D79A45] uppercase tracking-widest">Cards Due</span>
+                      <span className="block text-xl sm:text-2xl font-serif font-bold text-[#332821] dark:text-[#F2EADF] leading-none">{masteryStats.dueCards}</span>
+                      <span className="text-[10px] font-bold text-[#D79A45] dark:text-[#DCAA54] uppercase tracking-widest">Cards Due</span>
                     </div>
-                    <div className="w-px h-8 bg-[#D6CCBF]" />
+                    <div className="w-px h-8 bg-[#D6CCBF] dark:bg-[#44372E]" />
                     <div className="text-left sm:text-right">
-                      <span className="block text-xl sm:text-2xl font-serif font-bold text-[#332821] leading-none">{activeSubjectMistakes.length}</span>
-                      <span className="text-[10px] font-bold text-[#B84A39] uppercase tracking-widest">Mistakes</span>
+                      <span className="block text-xl sm:text-2xl font-serif font-bold text-[#332821] dark:text-[#F2EADF] leading-none">{activeSubjectMistakes.length}</span>
+                      <span className="text-[10px] font-bold text-[#B84A39] dark:text-[#f87171] uppercase tracking-widest">Mistakes</span>
                     </div>
                   </div>
                 </div>
@@ -336,7 +338,7 @@ export function StudyView() {
             </div>
 
             {/* Tab Navigation - Horizontally Scrollable without truncation */}
-            <div className="px-3 sm:px-6 lg:px-8 bg-[#FFFCF6] border-b border-[#D6CCBF]">
+            <div className="px-3 sm:px-6 lg:px-8 bg-[#FFFCF6] dark:bg-[#211A16] border-b border-[#D6CCBF] dark:border-[#44372E]">
               <div className="flex items-center gap-3 sm:gap-6 lg:gap-8 overflow-x-auto scrollbar-none py-1">
                 {[
                   { id: "materials", label: "Materials", count: subjectMaterials.length },
@@ -353,21 +355,23 @@ export function StudyView() {
                       className={clsx(
                         "relative py-3.5 flex items-center gap-1.5 text-xs sm:text-sm transition-colors whitespace-nowrap shrink-0 touch-target",
                         isActive
-                          ? "font-bold text-[#49372D]"
-                          : "font-semibold text-[#756C64] hover:text-[#49372D]"
+                          ? "font-bold text-[#49372D] dark:text-[#F2EADF]"
+                          : "font-semibold text-[#756C64] dark:text-[#B9ADA1] hover:text-[#49372D] dark:hover:text-[#F2EADF]"
                       )}
                     >
                       <span>{tab.label}</span>
                       {tab.count !== null && (
                         <span className={clsx(
                           "px-1.5 py-0.5 rounded text-[10px] font-bold",
-                          isActive ? "bg-[#B77A45] text-[#FFFCF6]" : "bg-[#F2EEE6] text-[#756C64]"
+                          isActive
+                            ? "bg-[#B77A45] dark:bg-[#D09A68] text-white dark:text-[#171310]"
+                            : "bg-[#F2EEE6] dark:bg-[#29211C] text-[#756C64] dark:text-[#B9ADA1]"
                         )}>
                           {tab.count}
                         </span>
                       )}
                       {isActive && (
-                        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#B77A45]" />
+                        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#B77A45] dark:bg-[#D09A68]" />
                       )}
                     </button>
                   );
@@ -380,13 +384,13 @@ export function StudyView() {
               {activeTab === "materials" && (
                 <div className="max-w-4xl mx-auto space-y-6">
                   {subjectMaterials.length === 0 ? (
-                    <div className="p-12 text-center border-2 border-dashed border-[#D6CCBF] bg-[#FFFCF6] rounded-xl shadow-sm">
-                      <FileText className="w-12 h-12 text-[#D6CCBF] mx-auto mb-4" />
-                      <p className="text-[#49372D] font-bold mb-2">No documents filed yet.</p>
-                      <p className="text-[#756C64] text-sm">Upload syllabus, reading materials, or notes.</p>
+                    <div className="p-12 text-center border-2 border-dashed border-[#D6CCBF] dark:border-[#44372E] bg-[#FFFCF6] dark:bg-[#211A16] rounded-xl shadow-sm">
+                      <FileText className="w-12 h-12 text-[#D6CCBF] dark:text-[#44372E] mx-auto mb-4" />
+                      <p className="text-[#49372D] dark:text-[#F2EADF] font-bold mb-2">No documents filed yet.</p>
+                      <p className="text-[#756C64] dark:text-[#B9ADA1] text-sm">Upload syllabus, reading materials, or notes.</p>
                       <button
                         onClick={() => setMaterialUploadOpen(true)}
-                        className="mt-6 px-4 py-2 bg-[#49372D] text-[#F7F3EA] text-sm font-bold rounded"
+                        className="mt-6 px-4 py-2 bg-[#49372D] dark:bg-[#C28A5C] text-[#F7F3EA] dark:text-[#171310] text-sm font-bold rounded-lg shadow-sm"
                       >
                         Upload First Document
                       </button>
@@ -395,38 +399,38 @@ export function StudyView() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {subjectMaterials.map((mat) => {
                         let MaterialIcon = File;
-                        let accentColor = "text-[#756C64]";
+                        let accentColor = "text-[#756C64] dark:text-[#B9ADA1]";
                         if (mat.type === "pdf") { MaterialIcon = FileText; accentColor = "text-[#ef4444]"; }
-                        else if (mat.type === "note") { MaterialIcon = Edit2; accentColor = "text-[#B77A45]"; }
+                        else if (mat.type === "note") { MaterialIcon = Edit2; accentColor = "text-[#B77A45] dark:text-[#D09A68]"; }
                         else if (mat.type === "image") { MaterialIcon = ImageIcon; accentColor = "text-[#3b82f6]"; }
 
                         const moduleName = subjectModules.find((m) => m.id === mat.moduleId)?.title || "General";
 
                         return (
-                          <div key={mat.id} className="bg-[#FFFCF6] border border-[#D6CCBF] p-5 rounded-lg shadow-sm flex flex-col gap-4 relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-16 h-16 bg-[#F7F3EA] border-l border-b border-[#D6CCBF] transform rotate-45 translate-x-8 -translate-y-8" />
+                          <div key={mat.id} className="bg-[#FFFCF6] dark:bg-[#211A16] border border-[#D6CCBF] dark:border-[#44372E] p-5 rounded-xl shadow-sm flex flex-col gap-4 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-[#F7F3EA] dark:bg-[#29211C] border-l border-b border-[#D6CCBF] dark:border-[#44372E] transform rotate-45 translate-x-8 -translate-y-8" />
                             <div className="flex items-start gap-4 z-10">
-                              <div className={clsx("p-3 bg-[#F2EEE6] border border-[#D6CCBF] rounded", accentColor)}>
+                              <div className={clsx("p-3 bg-[#F2EEE6] dark:bg-[#29211C] border border-[#D6CCBF] dark:border-[#44372E] rounded-lg", accentColor)}>
                                 <MaterialIcon className="w-5 h-5" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-[#332821] truncate font-serif text-lg leading-tight mb-1">{mat.title}</h3>
-                                <div className="flex items-center gap-2 text-[11px] font-bold text-[#756C64] uppercase tracking-wider">
+                                <h3 className="font-bold text-[#332821] dark:text-[#F2EADF] truncate font-serif text-lg leading-tight mb-1">{mat.title}</h3>
+                                <div className="flex items-center gap-2 text-[11px] font-bold text-[#756C64] dark:text-[#B9ADA1] uppercase tracking-wider">
                                   <span>{moduleName}</span>
                                   <span>•</span>
                                   <span>{mat.type}</span>
                                 </div>
                               </div>
-                              <button className="text-[#D6CCBF] hover:text-[#49372D] transition-colors">
+                              <button className="text-[#D6CCBF] dark:text-[#44372E] hover:text-[#49372D] dark:hover:text-[#F2EADF] transition-colors">
                                 <MoreVertical className="w-5 h-5" />
                               </button>
                             </div>
                             
-                            <div className="flex items-center gap-2 pt-4 border-t border-[#F2EEE6] z-10">
-                              <button onClick={() => setMaterialForAIGenerator(mat)} className="flex-1 py-2 bg-[#F7F3EA] hover:bg-[#F2EEE6] border border-[#D6CCBF] text-[#49372D] text-xs font-bold rounded transition-colors text-center shadow-sm">
+                            <div className="flex items-center gap-2 pt-4 border-t border-[#F2EEE6] dark:border-[#29211C] z-10">
+                              <button onClick={() => setMaterialForAIGenerator(mat)} className="flex-1 py-2 bg-[#F7F3EA] dark:bg-[#29211C] hover:bg-[#F2EEE6] dark:hover:bg-[#332820] border border-[#D6CCBF] dark:border-[#44372E] text-[#49372D] dark:text-[#F2EADF] text-xs font-bold rounded-lg transition-colors text-center shadow-sm">
                                 Extract Flashcards
                               </button>
-                              <button onClick={() => setMaterialForAIGenerator(mat)} className="flex-1 py-2 bg-[#F7F3EA] hover:bg-[#F2EEE6] border border-[#D6CCBF] text-[#49372D] text-xs font-bold rounded transition-colors text-center shadow-sm">
+                              <button onClick={() => setMaterialForAIGenerator(mat)} className="flex-1 py-2 bg-[#F7F3EA] dark:bg-[#29211C] hover:bg-[#F2EEE6] dark:hover:bg-[#332820] border border-[#D6CCBF] dark:border-[#44372E] text-[#49372D] dark:text-[#F2EADF] text-xs font-bold rounded-lg transition-colors text-center shadow-sm">
                                 Create Quiz
                               </button>
                             </div>
@@ -441,29 +445,29 @@ export function StudyView() {
               {activeTab === "flashcards" && (
                 <div className="max-w-4xl mx-auto space-y-6">
                   {masteryStats && (
-                    <div className="bg-[#FFFCF6] border border-[#D6CCBF] rounded-lg p-6 shadow-sm flex flex-wrap gap-8 items-center">
+                    <div className="bg-[#FFFCF6] dark:bg-[#211A16] border border-[#D6CCBF] dark:border-[#44372E] rounded-xl p-6 shadow-sm flex flex-wrap gap-8 items-center">
                       <div className="flex-1 min-w-[200px]">
-                        <h3 className="font-bold font-serif text-lg text-[#332821] mb-2">Deck Status</h3>
-                        <p className="text-sm text-[#756C64]">Review due items regularly to maintain high recall efficiency.</p>
+                        <h3 className="font-bold font-serif text-lg text-[#332821] dark:text-[#F2EADF] mb-2">Deck Status</h3>
+                        <p className="text-sm text-[#756C64] dark:text-[#B9ADA1]">Review due items regularly to maintain high recall efficiency.</p>
                       </div>
                       <div className="flex gap-6">
                         <div className="text-center">
                           <span className="block text-2xl font-bold font-mono text-[#10b981]">{masteryStats.masteredCards}</span>
-                          <span className="text-[10px] font-bold text-[#756C64] uppercase tracking-widest">Mastered</span>
+                          <span className="text-[10px] font-bold text-[#756C64] dark:text-[#B9ADA1] uppercase tracking-widest">Mastered</span>
                         </div>
                         <div className="text-center">
                           <span className="block text-2xl font-bold font-mono text-[#3b82f6]">{masteryStats.learningCards}</span>
-                          <span className="text-[10px] font-bold text-[#756C64] uppercase tracking-widest">Learning</span>
+                          <span className="text-[10px] font-bold text-[#756C64] dark:text-[#B9ADA1] uppercase tracking-widest">Learning</span>
                         </div>
                         <div className="text-center">
-                          <span className="block text-2xl font-bold font-mono text-[#D79A45]">{masteryStats.dueCards}</span>
-                          <span className="text-[10px] font-bold text-[#756C64] uppercase tracking-widest">Due</span>
+                          <span className="block text-2xl font-bold font-mono text-[#D79A45] dark:text-[#DCAA54]">{masteryStats.dueCards}</span>
+                          <span className="text-[10px] font-bold text-[#756C64] dark:text-[#B9ADA1] uppercase tracking-widest">Due</span>
                         </div>
                       </div>
                       {masteryStats.dueCards > 0 && (
                         <button
                           onClick={() => setActiveStudyCards(subjectCards.filter(c => c.state === 'new' || c.nextReviewDate <= new Date().toISOString().split("T")[0]))}
-                          className="px-6 py-3 bg-[#D79A45] hover:bg-[#B77A45] text-[#FFFCF6] text-sm font-bold rounded shadow-sm transition-colors"
+                          className="px-6 py-3 bg-[#D79A45] dark:bg-[#DCAA54] hover:bg-[#B77A45] text-white dark:text-[#171310] text-sm font-bold rounded-lg shadow-sm transition-colors"
                         >
                           Study All Due
                         </button>
@@ -473,23 +477,23 @@ export function StudyView() {
 
                   <div className="space-y-3">
                     {subjectCards.map((card) => {
-                      let badgeColor = "bg-[#F2EEE6] text-[#756C64] border-[#D6CCBF]";
-                      if (card.state === "mastered") badgeColor = "bg-[#d1fae5] text-[#059669] border-[#a7f3d0]";
-                      else if (card.state === "learning") badgeColor = "bg-[#fef3c7] text-[#d97706] border-[#fde68a]";
-                      else if (card.state === "review") badgeColor = "bg-[#dbeafe] text-[#2563eb] border-[#bfdbfe]";
+                      let badgeColor = "bg-[#F2EEE6] dark:bg-[#29211C] text-[#756C64] dark:text-[#B9ADA1] border-[#D6CCBF] dark:border-[#44372E]";
+                      if (card.state === "mastered") badgeColor = "bg-[#d1fae5] dark:bg-[#052E16] text-[#059669] dark:text-[#6ee7b7] border-[#a7f3d0] dark:border-[#059669]";
+                      else if (card.state === "learning") badgeColor = "bg-[#fef3c7] dark:bg-[#2B2016] text-[#d97706] dark:text-[#fde68a] border-[#fde68a] dark:border-[#d97706]";
+                      else if (card.state === "review") badgeColor = "bg-[#dbeafe] dark:bg-[#1E1B3A] text-[#2563eb] dark:text-[#93c5fd] border-[#bfdbfe] dark:border-[#3b82f6]";
 
                       return (
-                        <div key={card.id} className="bg-[#FFFCF6] border border-[#D6CCBF] rounded-md p-4 flex items-center justify-between gap-4 shadow-sm hover:border-[#B77A45] transition-colors group">
-                          <p className="flex-1 font-medium text-sm text-[#332821] truncate font-serif">{card.front}</p>
+                        <div key={card.id} className="bg-[#FFFCF6] dark:bg-[#211A16] border border-[#D6CCBF] dark:border-[#44372E] rounded-xl p-4 flex items-center justify-between gap-4 shadow-sm hover:border-[#B77A45] dark:hover:border-[#D09A68] transition-colors group">
+                          <p className="flex-1 font-medium text-sm text-[#332821] dark:text-[#F2EADF] truncate font-serif">{card.front}</p>
                           <div className="flex items-center gap-4 shrink-0">
-                            <span className={clsx("px-2 py-1 text-[10px] font-bold uppercase rounded border", badgeColor)}>
+                            <span className={clsx("px-2 py-1 text-[10px] font-bold uppercase rounded-md border", badgeColor)}>
                               {card.state}
                             </span>
-                            <span className="text-xs font-bold text-[#756C64] w-24 text-right flex items-center justify-end gap-1">
+                            <span className="text-xs font-bold text-[#756C64] dark:text-[#B9ADA1] w-24 text-right flex items-center justify-end gap-1">
                               <Clock className="w-3 h-3" />
                               {new Date(card.nextReviewDate) <= new Date() ? "Due now" : new Date(card.nextReviewDate).toLocaleDateString()}
                             </span>
-                            <button onClick={() => setActiveStudyCards([card])} className="px-3 py-1.5 bg-[#F2EEE6] hover:bg-[#E6DFD3] text-[#49372D] text-xs font-bold rounded transition-colors opacity-0 group-hover:opacity-100">
+                            <button onClick={() => setActiveStudyCards([card])} className="px-3 py-1.5 bg-[#F2EEE6] dark:bg-[#29211C] hover:bg-[#E6DFD3] dark:hover:bg-[#332820] text-[#49372D] dark:text-[#F2EADF] text-xs font-bold rounded-lg transition-colors opacity-0 group-hover:opacity-100">
                               Study
                             </button>
                           </div>
@@ -508,28 +512,28 @@ export function StudyView() {
                       const bestScore = attempts.length > 0 ? Math.max(...attempts.map(a => a.accuracy)) : null;
 
                       return (
-                        <div key={qz.id} className="bg-[#FFFCF6] border border-[#D6CCBF] rounded-lg p-6 shadow-sm flex flex-col justify-between">
+                        <div key={qz.id} className="bg-[#FFFCF6] dark:bg-[#211A16] border border-[#D6CCBF] dark:border-[#44372E] rounded-xl p-6 shadow-sm flex flex-col justify-between">
                           <div>
                             <div className="flex items-start justify-between mb-4">
-                              <span className={clsx("px-2 py-1 rounded text-[10px] font-bold uppercase border", qz.isExamMode ? "bg-[#f3e8ff] text-[#7e22ce] border-[#e9d5ff]" : "bg-[#dbeafe] text-[#2563eb] border-[#bfdbfe]")}>
+                              <span className={clsx("px-2 py-1 rounded-md text-[10px] font-bold uppercase border", qz.isExamMode ? "bg-[#f3e8ff] dark:bg-[#2D1B69] text-[#7e22ce] dark:text-[#c4b5fd] border-[#e9d5ff] dark:border-[#5b21b6]" : "bg-[#dbeafe] dark:bg-[#1E1B3A] text-[#2563eb] dark:text-[#93c5fd] border-[#bfdbfe] dark:border-[#3b82f6]")}>
                                 {qz.isExamMode ? "Exam Set" : "Practice Set"}
                               </span>
-                              <span className="text-xs font-bold text-[#756C64] bg-[#F2EEE6] px-2 py-1 rounded">
+                              <span className="text-xs font-bold text-[#756C64] dark:text-[#B9ADA1] bg-[#F2EEE6] dark:bg-[#29211C] px-2 py-1 rounded-md">
                                 {qz.questions.length} Qs
                               </span>
                             </div>
-                            <h3 className="font-bold font-serif text-xl text-[#332821] mb-2">{qz.title}</h3>
+                            <h3 className="font-bold font-serif text-xl text-[#332821] dark:text-[#F2EADF] mb-2">{qz.title}</h3>
                           </div>
-                          <div className="flex items-end justify-between mt-6 pt-4 border-t border-[#F2EEE6]">
+                          <div className="flex items-end justify-between mt-6 pt-4 border-t border-[#F2EEE6] dark:border-[#29211C]">
                             <div>
-                              <span className="block text-[10px] font-bold text-[#756C64] uppercase tracking-widest mb-1">Best Score</span>
+                              <span className="block text-[10px] font-bold text-[#756C64] dark:text-[#B9ADA1] uppercase tracking-widest mb-1">Best Score</span>
                               {bestScore !== null ? (
                                 <span className="text-lg font-bold font-mono text-[#10b981]">{bestScore}%</span>
                               ) : (
-                                <span className="text-sm font-medium text-[#D6CCBF]">--</span>
+                                <span className="text-sm font-medium text-[#D6CCBF] dark:text-[#44372E]">--</span>
                               )}
                             </div>
-                            <button onClick={() => setActiveQuizToRun(qz)} className="px-5 py-2.5 bg-[#49372D] hover:bg-[#332821] text-[#F7F3EA] text-sm font-bold rounded transition-colors shadow-sm">
+                            <button onClick={() => setActiveQuizToRun(qz)} className="px-5 py-2.5 bg-[#49372D] dark:bg-[#C28A5C] hover:bg-[#332821] dark:hover:bg-[#D39B6B] text-[#F7F3EA] dark:text-[#171310] text-sm font-bold rounded-lg transition-colors shadow-sm">
                               Start {qz.isExamMode ? "Exam" : "Practice"}
                             </button>
                           </div>
@@ -558,24 +562,24 @@ export function StudyView() {
 
       {/* Modals */}
       {createSubjectOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#332821]/40 backdrop-blur-sm">
-          <form onSubmit={handleCreateSubject} className="w-full max-w-sm bg-[#FFFCF6] border-2 border-[#D6CCBF] p-8 rounded-xl shadow-xl space-y-5">
-            <h3 className="text-xl font-serif font-bold text-[#332821]">New Course Entry</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#332821]/40 dark:bg-black/60 backdrop-blur-sm">
+          <form onSubmit={handleCreateSubject} className="w-full max-w-sm bg-[#FFFCF6] dark:bg-[#211A16] border-2 border-[#D6CCBF] dark:border-[#44372E] p-8 rounded-xl shadow-xl space-y-5">
+            <h3 className="text-xl font-serif font-bold text-[#332821] dark:text-[#F2EADF]">New Course Entry</h3>
             <div>
-              <label className="text-[11px] font-bold text-[#756C64] uppercase tracking-widest">Course Code</label>
-              <input type="text" value={newSubCode} onChange={(e) => setNewSubCode(e.target.value)} placeholder="e.g. ITST 306" required className="mt-1.5 w-full p-2.5 bg-[#F7F3EA] rounded border border-[#D6CCBF] focus:outline-none focus:border-[#B77A45] font-bold text-[#49372D] text-sm" />
+              <label className="text-[11px] font-bold text-[#756C64] dark:text-[#B9ADA1] uppercase tracking-widest">Course Code</label>
+              <input type="text" value={newSubCode} onChange={(e) => setNewSubCode(e.target.value)} placeholder="e.g. ITST 306" required className="mt-1.5 w-full p-2.5 bg-[#F7F3EA] dark:bg-[#29211C] rounded-lg border border-[#D6CCBF] dark:border-[#44372E] focus:outline-none focus:border-[#B77A45] dark:focus:border-[#D09A68] font-bold text-[#49372D] dark:text-[#F2EADF] text-sm" />
             </div>
             <div>
-              <label className="text-[11px] font-bold text-[#756C64] uppercase tracking-widest">Course Title</label>
-              <input type="text" value={newSubName} onChange={(e) => setNewSubName(e.target.value)} placeholder="UX/UI Design" required className="mt-1.5 w-full p-2.5 bg-[#F7F3EA] rounded border border-[#D6CCBF] focus:outline-none focus:border-[#B77A45] text-sm text-[#49372D]" />
+              <label className="text-[11px] font-bold text-[#756C64] dark:text-[#B9ADA1] uppercase tracking-widest">Course Title</label>
+              <input type="text" value={newSubName} onChange={(e) => setNewSubName(e.target.value)} placeholder="UX/UI Design" required className="mt-1.5 w-full p-2.5 bg-[#F7F3EA] dark:bg-[#29211C] rounded-lg border border-[#D6CCBF] dark:border-[#44372E] focus:outline-none focus:border-[#B77A45] dark:focus:border-[#D09A68] text-sm text-[#49372D] dark:text-[#F2EADF]" />
             </div>
             <div>
-              <label className="text-[11px] font-bold text-[#756C64] uppercase tracking-widest">Description</label>
-              <textarea value={newSubDesc} onChange={(e) => setNewSubDesc(e.target.value)} rows={2} className="mt-1.5 w-full p-2.5 bg-[#F7F3EA] rounded border border-[#D6CCBF] focus:outline-none focus:border-[#B77A45] text-sm text-[#49372D]" />
+              <label className="text-[11px] font-bold text-[#756C64] dark:text-[#B9ADA1] uppercase tracking-widest">Description</label>
+              <textarea value={newSubDesc} onChange={(e) => setNewSubDesc(e.target.value)} rows={2} className="mt-1.5 w-full p-2.5 bg-[#F7F3EA] dark:bg-[#29211C] rounded-lg border border-[#D6CCBF] dark:border-[#44372E] focus:outline-none focus:border-[#B77A45] dark:focus:border-[#D09A68] text-sm text-[#49372D] dark:text-[#F2EADF]" />
             </div>
             <div className="flex gap-3 pt-4">
-              <button type="button" onClick={() => setCreateSubjectOpen(false)} className="flex-1 py-2.5 rounded bg-[#F2EEE6] hover:bg-[#E6DFD3] border border-[#D6CCBF] text-[#49372D] font-bold text-sm transition-colors">Cancel</button>
-              <button type="submit" className="flex-1 py-2.5 rounded bg-[#49372D] hover:bg-[#332821] text-[#F7F3EA] font-bold text-sm transition-colors">Create</button>
+              <button type="button" onClick={() => setCreateSubjectOpen(false)} className="flex-1 py-2.5 rounded-lg bg-[#F2EEE6] dark:bg-[#29211C] hover:bg-[#E6DFD3] dark:hover:bg-[#332820] border border-[#D6CCBF] dark:border-[#44372E] text-[#49372D] dark:text-[#F2EADF] font-bold text-sm transition-colors">Cancel</button>
+              <button type="submit" className="flex-1 py-2.5 rounded-lg bg-[#49372D] dark:bg-[#C28A5C] hover:bg-[#332821] dark:hover:bg-[#D39B6B] text-[#F7F3EA] dark:text-[#171310] font-bold text-sm transition-colors">Create</button>
             </div>
           </form>
         </div>

@@ -5,36 +5,56 @@
 @layer base {
   /* === DEFAULT: StudyDeck Light === */
   :root {
-    --background: #F2EEE6;
-    --foreground: #29231F;
-    --surface: #F7F3EA;
+    --app-bg: #F2EEE6;
+    --surface: #FFFCF6;
+    --surface-secondary: #F7F3EA;
     --surface-muted: #EAE3D8;
-    --surface-subtle: #FFFCF6;
+    --sidebar: #2F241F;
+    --text-primary: #29231F;
+    --text-secondary: #756C64;
     --border: #D6CCBF;
-    --accent: #654A3A;
+    --border-strong: #B8A898;
+    --brand: #654A3A;
+    --brand-hover: #4D382D;
+    --accent: #B77A45;
+    --reward: #D79A45;
+
+    --background: var(--app-bg);
+    --foreground: var(--text-primary);
+    --surface-subtle: #FFFCF6;
     --accent-light: #EAE3D8;
     --accent-muted: #D6CCBF;
     --accent-text: #332821;
-    --muted-text: #756C64;
-    --progress-bar: #D79A45;
+    --muted-text: var(--text-secondary);
+    --progress-bar: var(--reward);
     --selection: #E8DEC8;
   }
 
   /* === StudyDeck Dark === */
   .dark {
-    --background: #181411;
-    --foreground: #F2EEE6;
-    --surface: #221B17;
-    --surface-muted: #2E2520;
-    --surface-subtle: #2B231E;
-    --border: #3D322B;
-    --accent: #D79A45;
-    --accent-light: #382A1E;
-    --accent-muted: #49372D;
-    --accent-text: #F0C078;
-    --muted-text: #9E9186;
-    --progress-bar: #D79A45;
-    --selection: #382A1E;
+    --app-bg: #171310;
+    --surface: #211A16;
+    --surface-secondary: #29211C;
+    --surface-muted: #332820;
+    --sidebar: #130F0D;
+    --text-primary: #F2EADF;
+    --text-secondary: #B9ADA1;
+    --border: #44372E;
+    --border-strong: #5A483A;
+    --brand: #C28A5C;
+    --brand-hover: #D39B6B;
+    --accent: #D09A68;
+    --reward: #DCAA54;
+
+    --background: var(--app-bg);
+    --foreground: var(--text-primary);
+    --surface-subtle: #211A16;
+    --accent-light: #29211C;
+    --accent-muted: #44372E;
+    --accent-text: #F2EADF;
+    --muted-text: var(--text-secondary);
+    --progress-bar: var(--reward);
+    --selection: #29211C;
   }
 
   /* === Midnight Light === */
@@ -791,50 +811,57 @@
 
 /* ============ New Academic Journal Buttons ============ */
 .btn-primary {
-  background-color: #49372D;
-  color: #F7F3EA;
+  background-color: var(--brand, #49372D);
+  color: var(--surface, #F7F3EA);
   border-radius: 6px;
   transition: all 0.15s ease;
 }
 .btn-primary:hover {
-  filter: brightness(1.1);
+  background-color: var(--brand-hover, #332821);
+  filter: brightness(1.05);
 }
 .btn-primary:active {
   transform: translateY(1px);
 }
 
 .btn-secondary {
-  background-color: #F7F3EA;
-  color: #49372D;
-  border: 1px solid #654A3A;
+  background-color: var(--surface, #F7F3EA);
+  color: var(--text-primary, #49372D);
+  border: 1px solid var(--border-strong, #654A3A);
   border-radius: 6px;
   transition: all 0.15s ease;
 }
+.btn-secondary:hover {
+  background-color: var(--surface-muted, #EAE3D8);
+}
 
 .btn-reward {
-  background-color: #D79A45;
+  background-color: var(--reward, #D79A45);
   color: #FFFFFF;
   border-radius: 6px;
   transition: all 0.15s ease;
 }
+.btn-reward:hover {
+  filter: brightness(1.08);
+}
 
 /* ============ Academic Journal Utilities ============ */
 .journal-sheet {
-  background-color: #F7F3EA;
-  border: 1px solid #D6CCBF;
+  background-color: var(--surface, #F7F3EA);
+  border: 1px solid var(--border, #D6CCBF);
   border-radius: 0.5rem;
 }
 .dark .journal-sheet {
-  background-color: #221B17;
-  border-color: #3D322B;
+  background-color: var(--surface, #211A16);
+  border-color: var(--border, #44372E);
 }
 
 .field-rule {
   height: 1px;
-  background-color: #D6CCBF;
+  background-color: var(--border, #D6CCBF);
 }
 .dark .field-rule {
-  background-color: #3D322B;
+  background-color: var(--border, #44372E);
 }
 
 .badge-seal {

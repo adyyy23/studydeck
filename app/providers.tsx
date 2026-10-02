@@ -1,41 +1,28 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider, useTheme } from "next-themes";
 import { useSettingsStore } from "@/lib/store/use-settings-store";
 import { useAuthStore } from "@/lib/store/use-auth-store";
 
 function ThemeInjector() {
   const { appTheme, lightDarkMode } = useSettingsStore();
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    if (lightDarkMode) {
+      setTheme(lightDarkMode);
+    }
+  }, [lightDarkMode, setTheme]);
 
   useEffect(() => {
     const root = document.documentElement;
     const toRemove = Array.from(root.classList).filter((c) => c.startsWith("theme-"));
     toRemove.forEach((c) => root.classList.remove(c));
-    if (appTheme !== "studydeck") root.classList.add(`theme-${appTheme}`);
-    if (lightDarkMode === "dark") {
-      root.classList.add("dark");
-    } else if (lightDarkMode === "light") {
-      root.classList.remove("dark");
-    } else {
-      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        root.classList.add("dark");
-      } else {
-        root.classList.remove("dark");
-      }
+    if (appTheme && appTheme !== "studydeck") {
+      root.classList.add(`theme-${appTheme}`);
     }
-  }, [appTheme, lightDarkMode]);
-
-  useEffect(() => {
-    if (lightDarkMode !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = (e: MediaQueryListEvent) => {
-      if (e.matches) document.documentElement.classList.add("dark");
-      else document.documentElement.classList.remove("dark");
-    };
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, [lightDarkMode]);
+  }, [appTheme]);
 
   return null;
 }

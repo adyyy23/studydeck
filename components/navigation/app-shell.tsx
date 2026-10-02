@@ -85,10 +85,12 @@ export function AppShell({ children }: AppShellProps) {
     { label: "Progress", href: "/progress", icon: BarChart3 },
   ];
 
+  const isStudy = pathname.startsWith("/study");
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-background text-foreground transition-colors duration-200">
       {/* Desktop Persistent Left Navigation Rail */}
-      <aside className="hidden md:flex flex-col w-64 border-r border-[#D6CCBF] dark:border-[#3D322B] bg-[#F7F3EA] dark:bg-[#221B17] h-screen sticky top-0 px-4 py-6 justify-between select-none shrink-0">
+      <aside className="hidden md:flex flex-col w-64 border-r border-[#D6CCBF] dark:border-[#44372E] bg-[#F7F3EA] dark:bg-[#171310] h-screen sticky top-0 px-4 py-6 justify-between select-none shrink-0 z-30">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-6">
             {/* Brand Logo */}
@@ -100,16 +102,16 @@ export function AppShell({ children }: AppShellProps) {
             <div className="px-2">
               <div className="flex items-end justify-between mb-1">
                 <div>
-                  <div className="text-[10px] font-bold text-[#654A3A] dark:text-[#D79A45] tracking-widest uppercase">LV. {levelInfo.level}</div>
-                  <div className="text-xs font-black text-[#332821] dark:text-[#F2EEE6] tracking-widest uppercase">{levelInfo.title}</div>
+                  <div className="text-[10px] font-bold text-[#654A3A] dark:text-[#D09A68] tracking-widest uppercase">LV. {levelInfo.level}</div>
+                  <div className="text-xs font-black text-[#332821] dark:text-[#F2EADF] tracking-widest uppercase">{levelInfo.title}</div>
                 </div>
-                <div className="text-[10px] font-bold text-[#756C64] dark:text-[#9E9186]">
+                <div className="text-[10px] font-bold text-[#756C64] dark:text-[#B9ADA1]">
                   {levelInfo.currentXP} / {levelInfo.nextLevelXP} XP
                 </div>
               </div>
-              <div className="h-1 bg-[#D6CCBF] dark:bg-[#3D322B] rounded-full overflow-hidden mt-1.5">
+              <div className="h-1 bg-[#D6CCBF] dark:bg-[#44372E] rounded-full overflow-hidden mt-1.5">
                 <div 
-                  className="h-full bg-[#B77A45] dark:bg-[#D79A45] transition-all duration-500 ease-out" 
+                  className="h-full bg-[#B77A45] dark:bg-[#D09A68] transition-all duration-500 ease-out" 
                   style={{ width: `${Math.min(100, Math.max(0, (levelInfo.currentXP / levelInfo.nextLevelXP) * 100))}%` }}
                 />
               </div>
@@ -120,13 +122,13 @@ export function AppShell({ children }: AppShellProps) {
           <div className="px-2">
             <button
               onClick={() => setSearchOpen(true)}
-              className="flex items-center justify-between w-full px-3 py-2 text-sm text-[#756C64] dark:text-[#9E9186] bg-[#EAE3D8] dark:bg-[#2E2520] border border-[#D6CCBF] dark:border-[#3D322B] rounded-md hover:border-[#805B43] dark:hover:border-[#B77A45] transition-colors"
+              className="flex items-center justify-between w-full px-3 py-2 text-sm text-[#756C64] dark:text-[#B9ADA1] bg-[#EAE3D8] dark:bg-[#29211C] border border-[#D6CCBF] dark:border-[#44372E] rounded-md hover:border-[#805B43] dark:hover:border-[#D09A68] transition-colors"
             >
               <span className="flex items-center gap-2">
-                <Search className="w-4 h-4 text-[#756C64] dark:text-[#9E9186]" strokeWidth={1.75} />
+                <Search className="w-4 h-4 text-[#756C64] dark:text-[#B9ADA1]" strokeWidth={1.75} />
                 <span className="font-medium font-sans">Search...</span>
               </span>
-              <kbd className="text-[10px] bg-[#F7F3EA] dark:bg-[#221B17] px-1.5 py-0.5 rounded border border-[#D6CCBF] dark:border-[#3D322B] font-mono font-bold shadow-sm">
+              <kbd className="text-[10px] bg-[#F7F3EA] dark:bg-[#211A16] px-1.5 py-0.5 rounded border border-[#D6CCBF] dark:border-[#44372E] font-mono font-bold shadow-sm">
                 ⌘K
               </kbd>
             </button>
@@ -146,16 +148,16 @@ export function AppShell({ children }: AppShellProps) {
                   className={clsx(
                     "flex items-center gap-3 px-3 py-2 text-sm font-bold transition-all duration-100",
                     isActive
-                      ? "bg-[#EAE3D8] dark:bg-[#2E2520] text-[#332821] dark:text-[#F2EEE6] border-l-2 border-[#654A3A] dark:border-[#D79A45]"
-                      : "text-[#756C64] dark:text-[#9E9186] hover:bg-[#EAE3D8]/50 dark:hover:bg-[#2E2520]/50 hover:text-[#332821] dark:hover:text-[#F2EEE6] border-l-2 border-transparent"
+                      ? "bg-[#EAE3D8] dark:bg-[#29211C] text-[#332821] dark:text-[#F2EADF] border-l-2 border-[#654A3A] dark:border-[#D09A68]"
+                      : "text-[#756C64] dark:text-[#B9ADA1] hover:bg-[#EAE3D8]/50 dark:hover:bg-[#29211C]/50 hover:text-[#332821] dark:hover:text-[#F2EADF] border-l-2 border-transparent"
                   )}
                 >
                   <Icon
                     className={clsx(
                       "w-4 h-4",
                       isActive
-                        ? "text-[#654A3A] dark:text-[#D79A45]"
-                        : "text-[#756C64] dark:text-[#9E9186]"
+                        ? "text-[#654A3A] dark:text-[#D09A68]"
+                        : "text-[#756C64] dark:text-[#B9ADA1]"
                     )}
                     strokeWidth={1.75}
                   />
@@ -165,18 +167,18 @@ export function AppShell({ children }: AppShellProps) {
             })}
           </nav>
 
-          <div className="h-px bg-[#D6CCBF] dark:bg-[#3D322B] mx-2" />
+          <div className="h-px bg-[#D6CCBF] dark:bg-[#44372E] mx-2" />
 
           {/* Quick Companion Tools */}
           <div className="flex flex-col gap-2 px-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#756C64] dark:text-[#9E9186] mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#756C64] dark:text-[#B9ADA1] mb-1">
               Tools
             </span>
             <button
               onClick={() => setPomodoroOpen(true)}
-              className="group flex items-center gap-3 px-2 py-1.5 rounded-md text-xs font-semibold text-[#332821] dark:text-[#F2EEE6] hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] transition-colors text-left"
+              className="group flex items-center gap-3 px-2 py-1.5 rounded-md text-xs font-semibold text-[#332821] dark:text-[#F2EADF] hover:bg-[#EAE3D8] dark:hover:bg-[#29211C] transition-colors text-left"
             >
-              <div className="w-6 h-6 rounded flex items-center justify-center shrink-0 bg-[#EAE3D8] dark:bg-[#2E2520] text-[#756C64] dark:text-[#9E9186] group-hover:bg-[#D79A45] group-hover:text-white transition-colors relative">
+              <div className="w-6 h-6 rounded flex items-center justify-center shrink-0 bg-[#EAE3D8] dark:bg-[#29211C] text-[#756C64] dark:text-[#B9ADA1] group-hover:bg-[#D79A45] group-hover:text-white transition-colors relative">
                 <Timer className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-[#B77A45] rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -187,9 +189,9 @@ export function AppShell({ children }: AppShellProps) {
 
             <button
               onClick={() => setAiOpen(true)}
-              className="group flex items-center gap-3 px-2 py-1.5 rounded-md text-xs font-semibold text-[#332821] dark:text-[#F2EEE6] hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] transition-colors text-left"
+              className="group flex items-center gap-3 px-2 py-1.5 rounded-md text-xs font-semibold text-[#332821] dark:text-[#F2EADF] hover:bg-[#EAE3D8] dark:hover:bg-[#29211C] transition-colors text-left"
             >
-              <div className="w-6 h-6 rounded flex items-center justify-center shrink-0 bg-[#EAE3D8] dark:bg-[#2E2520] text-[#756C64] dark:text-[#9E9186] group-hover:bg-[#6B4E71] group-hover:text-white transition-colors relative">
+              <div className="w-6 h-6 rounded flex items-center justify-center shrink-0 bg-[#EAE3D8] dark:bg-[#29211C] text-[#756C64] dark:text-[#B9ADA1] group-hover:bg-[#6B4E71] group-hover:text-white transition-colors relative">
                 <Sparkles className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-[#6B4E71] rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -201,11 +203,11 @@ export function AppShell({ children }: AppShellProps) {
         </div>
 
         {/* User Footer Profile & Notifications */}
-        <div className="pt-4 border-t border-[#D6CCBF] dark:border-[#3D322B] flex flex-col gap-3">
+        <div className="pt-4 border-t border-[#D6CCBF] dark:border-[#44372E] flex flex-col gap-3">
           <div className="flex items-center justify-between px-2 mb-1">
             <button
               onClick={() => setNotificationsOpen(true)}
-              className="relative p-1.5 text-[#756C64] dark:text-[#9E9186] hover:text-[#332821] dark:hover:text-[#F2EEE6] rounded-md hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] transition-colors"
+              className="relative p-1.5 text-[#756C64] dark:text-[#B9ADA1] hover:text-[#332821] dark:hover:text-[#F2EADF] rounded-md hover:bg-[#EAE3D8] dark:hover:bg-[#29211C] transition-colors"
               aria-label="Notifications"
             >
               <Bell className="w-4 h-4" strokeWidth={1.75} />
@@ -215,7 +217,7 @@ export function AppShell({ children }: AppShellProps) {
             </button>
             <button
               onClick={() => setProfileOpen(true)}
-              className="text-[9px] font-bold text-[#756C64] dark:text-[#9E9186] hover:text-[#332821] dark:hover:text-[#F2EEE6] uppercase tracking-wider transition-colors underline decoration-[#D6CCBF] dark:decoration-[#3D322B] underline-offset-2"
+              className="text-[9px] font-bold text-[#756C64] dark:text-[#B9ADA1] hover:text-[#332821] dark:hover:text-[#F2EADF] uppercase tracking-wider transition-colors underline decoration-[#D6CCBF] dark:decoration-[#44372E] underline-offset-2"
             >
               Wardrobe
             </button>
@@ -223,7 +225,7 @@ export function AppShell({ children }: AppShellProps) {
 
           <button
             onClick={() => setProfileOpen(true)}
-            className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] transition-colors text-left group"
+            className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-[#EAE3D8] dark:hover:bg-[#29211C] transition-colors text-left group"
           >
             <div className="flex items-center gap-3 min-w-0">
               <AnimalAvatar
@@ -232,40 +234,43 @@ export function AppShell({ children }: AppShellProps) {
                 size="sm"
               />
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold text-[#332821] dark:text-[#F2EEE6] truncate group-hover:text-[#654A3A] dark:group-hover:text-[#D79A45] transition-colors">
+                <span className="text-sm font-bold text-[#332821] dark:text-[#F2EADF] truncate group-hover:text-[#654A3A] dark:group-hover:text-[#D09A68] transition-colors">
                   {user.firstName} {user.lastName}
                 </span>
-                <span className="text-[10px] font-semibold text-[#756C64] dark:text-[#9E9186] truncate">Lv.{levelInfo.level} • {levelInfo.title}</span>
+                <span className="text-[10px] font-semibold text-[#756C64] dark:text-[#B9ADA1] truncate">Lv.{levelInfo.level} • {levelInfo.title}</span>
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <Flame className={clsx("w-3.5 h-3.5", currentStreak > 0 ? "text-[#D79A45] fill-[#D79A45]" : "text-[#D6CCBF] dark:text-[#3D322B]")} strokeWidth={1.75} />
+              <Flame className={clsx("w-3.5 h-3.5", currentStreak > 0 ? "text-[#D79A45] fill-[#D79A45]" : "text-[#D6CCBF] dark:text-[#44372E]")} strokeWidth={1.75} />
             </div>
           </button>
         </div>
       </aside>
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col min-w-0 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
+      <div className={clsx(
+        "flex-1 flex flex-col min-w-0",
+        isStudy ? "h-screen overflow-hidden" : "pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8"
+      )}>
         {/* Mobile Header */}
-        <header className="md:hidden sticky top-0 z-30 bg-[#F7F3EA]/95 dark:bg-[#221B17]/95 backdrop-blur-sm border-b border-[#D6CCBF] dark:border-[#3D322B] px-3 sm:px-4 py-2.5 flex items-center justify-between safe-top">
+        <header className="md:hidden sticky top-0 z-30 bg-[#F7F3EA]/95 dark:bg-[#171310]/95 backdrop-blur-sm border-b border-[#D6CCBF] dark:border-[#44372E] px-3 sm:px-4 py-2.5 flex items-center justify-between safe-top">
           <Link href="/" className="focus:outline-none shrink-0 mr-2">
             <Logo size="sm" showWordmark={true} />
           </Link>
 
           <div className="flex items-center gap-1 sm:gap-1.5 ml-auto">
-            <div className="hidden xs:flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#FFFBEB] dark:bg-[#2B2016] border border-[#D79A45]/30 text-[#B77A45] dark:text-[#D79A45] font-bold text-[10px]">
+            <div className="hidden xs:flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#FFFBEB] dark:bg-[#29211C] border border-[#D79A45]/30 text-[#B77A45] dark:text-[#D09A68] font-bold text-[10px]">
               <Flame className="w-3 h-3 text-[#D79A45] fill-[#D79A45]" />
               <span>{currentStreak}d</span>
             </div>
-            <div className="hidden xs:flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#EAE3D8] dark:bg-[#2E2520] border border-[#D6CCBF] dark:border-[#3D322B] text-[#332821] dark:text-[#F2EEE6] font-bold text-[10px]">
+            <div className="hidden xs:flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#EAE3D8] dark:bg-[#29211C] border border-[#D6CCBF] dark:border-[#44372E] text-[#332821] dark:text-[#F2EADF] font-bold text-[10px]">
               <span>Lv.{levelInfo.level}</span>
             </div>
 
             {/* Quick Mobile Tools: Milo & Lumi */}
             <button
               onClick={() => setPomodoroOpen(true)}
-              className="p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] rounded-md transition-colors"
+              className="p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#B9ADA1] dark:hover:text-[#F2EADF] hover:bg-[#EAE3D8] dark:hover:bg-[#29211C] rounded-md transition-colors"
               aria-label="Milo Focus Timer"
               title="Milo's Focus Timer"
             >
@@ -273,7 +278,7 @@ export function AppShell({ children }: AppShellProps) {
             </button>
             <button
               onClick={() => setAiOpen(true)}
-              className="p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] rounded-md transition-colors"
+              className="p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#B9ADA1] dark:hover:text-[#F2EEE6] hover:bg-[#EAE3D8] dark:hover:bg-[#29211C] rounded-md transition-colors"
               aria-label="Lumi AI Assistant"
               title="Lumi AI Assistant"
             >
@@ -282,14 +287,14 @@ export function AppShell({ children }: AppShellProps) {
 
             <button
               onClick={() => setSearchOpen(true)}
-              className="p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] rounded-md transition-colors"
+              className="p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#B9ADA1] dark:hover:text-[#F2EADF] hover:bg-[#EAE3D8] dark:hover:bg-[#29211C] rounded-md transition-colors"
               aria-label="Search"
             >
               <Search className="w-4 h-4" />
             </button>
             <button
               onClick={() => setNotificationsOpen(true)}
-              className="relative p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#9E9186] dark:hover:text-[#F2EEE6] hover:bg-[#EAE3D8] dark:hover:bg-[#2E2520] rounded-md transition-colors"
+              className="relative p-1.5 text-[#756C64] hover:text-[#332821] dark:text-[#B9ADA1] dark:hover:text-[#F2EADF] hover:bg-[#EAE3D8] dark:hover:bg-[#29211C] rounded-md transition-colors"
               aria-label="Notifications"
             >
               <Bell className="w-4 h-4" />
@@ -312,13 +317,18 @@ export function AppShell({ children }: AppShellProps) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 md:px-8 py-4 sm:py-5 md:py-8">
+        <main className={clsx(
+          "flex-1 w-full",
+          isStudy
+            ? "h-[calc(100dvh-3.5rem)] md:h-screen overflow-hidden p-0"
+            : "max-w-5xl mx-auto px-3 sm:px-6 md:px-8 py-4 sm:py-5 md:py-8"
+        )}>
           {children}
         </main>
       </div>
 
       {/* Mobile Bottom Navigation Bar with Safe Area Inset */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#F7F3EA]/95 dark:bg-[#221B17]/95 backdrop-blur-md border-t border-[#D6CCBF] dark:border-[#3D322B] px-1 sm:px-2 pt-1 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex items-center justify-around select-none">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#F7F3EA]/95 dark:bg-[#171310]/95 backdrop-blur-md border-t border-[#D6CCBF] dark:border-[#44372E] px-1 sm:px-2 pt-1 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex items-center justify-around select-none">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
@@ -331,11 +341,11 @@ export function AppShell({ children }: AppShellProps) {
               className={clsx(
                 "flex flex-col items-center justify-center flex-1 py-1 transition-all text-center touch-target",
                 isActive
-                  ? "text-[#654A3A] dark:text-[#D79A45] font-bold"
-                  : "text-[#756C64] dark:text-[#9E9186] hover:text-[#332821] dark:hover:text-[#F2EEE6]"
+                  ? "text-[#654A3A] dark:text-[#D09A68] font-bold"
+                  : "text-[#756C64] dark:text-[#B9ADA1] hover:text-[#332821] dark:hover:text-[#F2EADF]"
               )}
             >
-              <Icon className={clsx("w-5 h-5 mb-0.5", isActive && "fill-[#654A3A]/10 dark:fill-[#D79A45]/10")} strokeWidth={1.75} />
+              <Icon className={clsx("w-5 h-5 mb-0.5", isActive && "fill-[#654A3A]/10 dark:fill-[#D09A68]/10")} strokeWidth={1.75} />
               <span className="text-[10px] tracking-tight">{item.label}</span>
             </Link>
           );

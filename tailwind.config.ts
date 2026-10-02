@@ -28,8 +28,16 @@ const config: Config = {
 
         background: "var(--background)",
         foreground: "var(--foreground)",
+        "app-bg": "var(--app-bg)",
+        sidebar: "var(--sidebar)",
+        "text-primary": "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        "border-strong": "var(--border-strong)",
+        "brand-hover": "var(--brand-hover)",
+        reward: "var(--reward)",
         surface: {
           DEFAULT: "var(--surface)",
+          secondary: "var(--surface-secondary)",
           muted: "var(--surface-muted)",
           subtle: "var(--surface-subtle)",
           border: "var(--border)",
